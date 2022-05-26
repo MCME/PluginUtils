@@ -307,9 +307,9 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                  .getNearbyEntities(new BoundingBox(location.getBlockX(),
                                                     location.getBlockY(),
                                                     location.getBlockZ(),
-                                                    maxX+1,
-                                                    location.getBlockY()+size.getBlockY()+1,
-                                                    maxZ+1),
+                                                    maxX,
+                                                    location.getBlockY()+size.getBlockY(),
+                                                    maxZ),
                         new MCMEEntityFilter());
         for(Entity entity: entities) {
             entity.remove();
