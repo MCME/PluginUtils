@@ -681,7 +681,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             }
         }
         Location high = location.clone().add(finalSize.toLocation(location.getWorld()));
-        NMSUtil.updatePlayerChunks(location, high);
+        //NMSUtil.updatePlayerChunks(location, high);
     }
     
     private static int tileCoord(double entityCoord) {

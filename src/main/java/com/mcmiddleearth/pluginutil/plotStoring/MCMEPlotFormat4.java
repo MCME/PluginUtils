@@ -358,7 +358,7 @@ public class MCMEPlotFormat4 implements PlotStorageFormat {
                     }
 //Logger.getGlobal().info("Size: "+finalSize.getBlockX()+" "+finalSize.getBlockY()+" "+finalSize.getBlockZ());
                     Location high = location.clone().add(finalSize.toLocation(location.getWorld()));
-                    NMSUtil.updatePlayerChunks(location, high);
+                    //NMSUtil.updatePlayerChunks(location, high);
                 }
             }.runTaskLater(PluginUtilsPlugin.getInstance(), 1);
         } catch (ClassNotFoundException ex) {

@@ -36,51 +36,53 @@ public class NBTTagBuilder {
     }
     
     public NBTTagBuilder setString(String key, String value) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        tag.getClass().getMethod("setString", String.class, String.class)
+        tag.getClass().getMethod("a", String.class, String.class)
                       .invoke(tag, key, value);
         return this;
     }
     
     public NBTTagBuilder setInt(String key, int value) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        tag.getClass().getMethod("setInt", String.class, int.class)
+        tag.getClass().getMethod("a", String.class, int.class)
                       .invoke(tag, key, value);
         return this;
     }
     
     public NBTTagBuilder setShort(String key, short value) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        tag.getClass().getMethod("setShort", String.class, short.class)
+        tag.getClass().getMethod("a", String.class, short.class)
                       .invoke(tag, key, value);
         return this;
     }
     
     public NBTTagBuilder setByte(String key, byte value) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        tag.getClass().getMethod("setByte", String.class, byte.class)
+        tag.getClass().getMethod("a", String.class, byte.class)
                       .invoke(tag, key, value);
         return this;
     }
     
     public NBTTagBuilder setBoolean(String key, boolean value) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        tag.getClass().getMethod("setBoolean", String.class, boolean.class)
+        tag.getClass().getMethod("a", String.class, boolean.class)
                       .invoke(tag, key, value);
         return this;
     }
     
     public NBTTagBuilder setFloat(String key, float value) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        tag.getClass().getMethod("setFloat", String.class, float.class)
+        tag.getClass().getMethod("a", String.class, float.class)
                       .invoke(tag, key, value);
         return this;
     }
     
     public NBTTagBuilder setTag(String key, Object newTag) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
-        tag.getClass().getMethod("set", String.class, NMSUtil.getNMSClass("nbt.NBTBase"))
+        tag.getClass().getMethod("a", String.class, NMSUtil.getNMSClass("nbt.NBTBase"))
                       .invoke(tag, key, newTag);
         return this;
     }
     
     public NBTTagBuilder setTagList(String key, Object... tags) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
         Object list = NMSUtil.getNMSClass("nbt.NBTTagList").getConstructor().newInstance();
+        int i = 0;
         for(Object newTag: tags) {
-            list.getClass().getMethod("add", NMSUtil.getNMSClass("nbt.NBTBase")).invoke(list, newTag);
+            list.getClass().getMethod("b", int.class, NMSUtil.getNMSClass("nbt.NBTBase")).invoke(list, i, newTag);
+            i++;
         }
         setTag(key, list);
         return this;
@@ -88,10 +90,12 @@ public class NBTTagBuilder {
     
     public NBTTagBuilder setFloatList(String key, Float... elements) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
         Object list = NMSUtil.getNMSClass("nbt.NBTTagList").getConstructor().newInstance();
+        int i = 0;
         for(Float element: elements) {
             Object newTag = NMSUtil.getNMSClass("nbt.NBTTagFloat").getConstructor(float.class)
                                                               .newInstance(element);
-            list.getClass().getMethod("add", NMSUtil.getNMSClass("nbt.NBTBase")).invoke(list, newTag);
+            list.getClass().getMethod("b"/*add*/, int.class, NMSUtil.getNMSClass("nbt.NBTBase")).invoke(list, i, newTag);
+            i++;
         }
         setTag(key, list);
         return this;
@@ -102,7 +106,7 @@ public class NBTTagBuilder {
     }
     
     public short getShort(String key) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        return (short) tag.getClass().getMethod("getShort", String.class).invoke(tag, key);
+        return (short) tag.getClass().getMethod("g"/*getShort*/, String.class).invoke(tag, key);
     }
     
     @Override
