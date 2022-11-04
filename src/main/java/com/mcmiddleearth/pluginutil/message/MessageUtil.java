@@ -145,12 +145,26 @@ public class MessageUtil {
 
     public static void sendRawMessage(Player sender, String message) {
         try {
-            Object chatBaseComponent = NMSUtil.getNMSClass("network.chat.IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, message);
-            Object chatMessageType = NMSUtil.invokeNMS("network.chat.ChatMessageType", "a", new Class[]{byte.class}, null, (byte)0);
-            Constructor<?> titleConstructor = NMSUtil.getNMSClass("network.protocol.game.PacketPlayOutChat").getConstructor(NMSUtil.getNMSClass("network.chat.IChatBaseComponent"),
-                                                                                                      NMSUtil.getNMSClass("network.chat.ChatMessageType"),
-                                                                                                      UUID.class);
-            Object chatPacket = titleConstructor.newInstance(chatBaseComponent, chatMessageType, sender.getUniqueId());
+            Object chatMutableComponent = NMSUtil.getNMSClass("network.chat.IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, message);
+            Class<?>[] chatMessageTypeClasses = NMSUtil.getNMSClass("network.chat.ChatMessageType").getDeclaredClasses();
+            Class<?> chatMessageTypeClass_b = null;
+            for(Class<?> search: chatMessageTypeClasses) {
+                if(search.getSimpleName().equals("b")) {
+                    chatMessageTypeClass_b = search;
+                    break;
+                }
+            }
+            assert chatMessageTypeClass_b != null;
+            Object chatMessageType_b = chatMessageTypeClass_b.getConstructor(int.class,
+                    NMSUtil.getNMSClass("network.chat.IChatBaseComponent"),
+                    NMSUtil.getNMSClass("network.chat.IChatBaseComponent")).newInstance(0, chatMutableComponent, null);
+            Object chatMessageContent = NMSUtil.createNMSObject("network.chat.ChatMessageContent",
+                    new Class[]{String.class, NMSUtil.getNMSClass("network.chat.IChatBaseComponent")}, message, chatMutableComponent);
+            Object playerChatMessage = NMSUtil.invokeNMS("network.chat.PlayerChatMessage", "a",
+                    new Class[]{NMSUtil.getNMSClass("network.chat.ChatMessageContent")}, null, chatMessageContent);
+            Constructor<?> packetConstructor = NMSUtil.getNMSClass("network.protocol.game.ClientboundPlayChatPacket")
+                    .getConstructor(NMSUtil.getNMSClass("network.chat.PlayerChatMessage"), NMSUtil.getNMSClass("network.chat.ChatMessageType"));
+            Object chatPacket = packetConstructor.newInstance(playerChatMessage, chatMessageType_b);
             NMSUtil.sendPacket(sender, chatPacket);
             /*((CraftPlayer) sender).getHandle()
             .playerConnection
