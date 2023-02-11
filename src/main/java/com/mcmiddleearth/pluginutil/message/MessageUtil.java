@@ -146,33 +146,13 @@ public class MessageUtil {
     public static void sendRawMessage(Player sender, String message) {
         try {
             Object chatMutableComponent = NMSUtil.getNMSClass("network.chat.IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, message);
-            Class<?>[] chatMessageTypeClasses = NMSUtil.getNMSClass("network.chat.ChatMessageType").getDeclaredClasses();
-            Class<?> chatMessageTypeClass_b = null;
-            for(Class<?> search: chatMessageTypeClasses) {
-                if(search.getSimpleName().equals("b")) {
-                    chatMessageTypeClass_b = search;
-                    break;
-                }
-            }
-            assert chatMessageTypeClass_b != null;
-            Object chatMessageType_b = chatMessageTypeClass_b.getConstructor(int.class,
-                    NMSUtil.getNMSClass("network.chat.IChatBaseComponent"),
-                    NMSUtil.getNMSClass("network.chat.IChatBaseComponent")).newInstance(0, chatMutableComponent, null);
-            Object chatMessageContent = NMSUtil.createNMSObject("network.chat.ChatMessageContent",
-                    new Class[]{String.class, NMSUtil.getNMSClass("network.chat.IChatBaseComponent")}, message, chatMutableComponent);
-            Object playerChatMessage = NMSUtil.invokeNMS("network.chat.PlayerChatMessage", "a",
-                    new Class[]{NMSUtil.getNMSClass("network.chat.ChatMessageContent")}, null, chatMessageContent);
-            Constructor<?> packetConstructor = NMSUtil.getNMSClass("network.protocol.game.ClientboundPlayChatPacket")
-                    .getConstructor(NMSUtil.getNMSClass("network.chat.PlayerChatMessage"), NMSUtil.getNMSClass("network.chat.ChatMessageType"));
-            Object chatPacket = packetConstructor.newInstance(playerChatMessage, chatMessageType_b);
+            Constructor<?> packetConstructor = NMSUtil.getNMSClass("network.protocol.game.ClientboundSystemChatPacket")
+                    .getConstructor(NMSUtil.getNMSClass("network.chat.IChatBaseComponent"), boolean.class);
+            Object chatPacket = packetConstructor.newInstance(chatMutableComponent, false);
             NMSUtil.sendPacket(sender, chatPacket);
-            /*((CraftPlayer) sender).getHandle()
-            .playerConnection
-            .sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer
-            .a(message)));*/
         } catch(Error | Exception ex ) {
             Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, null, ex);
-            Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Error in Minigames plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/tellraw ...' instead of directly sending message packets.");
+            Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Error in PluginUtils plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/tellraw ...' instead of directly sending message packets.");
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName()+ " " + message);
         }
     }
