@@ -177,7 +177,7 @@ public class LocalTransformation {
             } else if(flips[0] && face%2 == 1) {
                 return (byte) ((face+2)%4);
             }
-        } else if(type.equals("minecraft:item_frame")) {
+        } else if(type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
             if(flips[1] && face <= 1) {
                 return (byte) ((face+1)%2);
             } else if(flips[2] && (face == 2 || face == 3)) {
@@ -194,7 +194,7 @@ public class LocalTransformation {
             if(face >=0) {
                 return (byte) ((face+rotations)%4);
             }
-        } else if(type.equals("minecraft:item_frame")) {
+        } else if(type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
             if(face > 1) {
                 byte[] order = new byte[]{5,3,4,2};
                 for(int i=0; i< order.length;i++) {

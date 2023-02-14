@@ -178,8 +178,9 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                 Object nbt = NBTTagUtil.createNBTCompound();
                 Object nmsEntity = NMSUtil.invokeCraftBukkit("entity.CraftEntity", "getHandle",
                                                              null, entity);
-                NMSUtil.invokeNMS("nbt.NBTTagCompound","a",null, nbt,"id",
-                                  NMSUtil.invokeNMS("world.entity.Entity","bn",null, nmsEntity));
+                NMSUtil.invokeNMS("nbt.NBTTagCompound","a",
+                        new Class[]{String.class, String.class} , nbt,"id",
+                        NMSUtil.invokeNMS("world.entity.Entity","bq",null, nmsEntity));
                 nbt = NMSUtil.invokeNMS("world.entity.Entity","f",null, nmsEntity,nbt);
                 Class[] argsClasses = new Class[]{NMSUtil.getNMSClass("nbt.NBTTagCompound"),DataOutput.class};
                 NMSUtil.invokeNMS("nbt.NBTCompressedStreamTools","a",argsClasses,null,nbt,(DataOutput)out);
@@ -607,18 +608,47 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                         new Class[]{String.class},
                         nbt, "id");
                 Byte facing = 0;
-                if (type.equals("minecraft:painting") || type.equals("minecraft:item_frame")) {
+//Logger.getGlobal().info("id: "+type);
+//type = type.replace("minecraft:","");
+//                type = "minecraft:"+armor_stand;
+//                NMSUtil.invokeNMS("nbt.NBTTagCompound","a",null, nbt,"id",type);
+//type = (String) NMSUtil.invokeNMS("nbt.NBTTagCompound", "l"/*"getString"*/,
+//        new Class[]{String.class},
+ //       nbt, "id");
+//Logger.getGlobal().info("id reread: "+type);
+//Logger.getGlobal().info("id: "+type);
+                if (type.equals("minecraft:painting") || type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
+//Logger.getGlobal().log(Level.INFO, "NBT: "+nbt.toString());
+//System.out.println("NBT: "+nbt.toString());
                     //byte f(String)
-                    facing = (Byte) NMSUtil.invokeNMS("nbt.NBTTagCompound", "f"/*"getByte"*/,
-                            new Class[]{String.class},
-                            nbt, "Facing");
+                    boolean lowercaseFacing;
+                    if(NBTTagUtil.hasKey(nbt, "Facing")) {
+                        facing = (Byte) NMSUtil.invokeNMS("nbt.NBTTagCompound", "f"/*"getByte"*/,
+                                new Class[]{String.class},
+                                nbt, "Facing");
+                        lowercaseFacing = false;
+                    } else {
+                        facing = (Byte) NMSUtil.invokeNMS("nbt.NBTTagCompound", "f"/*"getByte"*/,
+                                new Class[]{String.class},
+                                nbt, "facing");
+                        lowercaseFacing = true;
+                    }
+//Logger.getGlobal().info("hanging: "+facing);
                     Byte transformedFacing = rotation.transformHangingEntity(type, facing);
+//Logger.getGlobal().info("hanging rot: "+transformedFacing);
                     Object nbtFacing = NBTTagUtil.createNBTTagByte(transformedFacing);
                     //NBTBase a(String, NBTBase)
-                    NMSUtil.invokeNMS("nbt.NBTTagCompound", "a"/*"set"*/,
-                            new Class[]{String.class, NMSUtil.getNMSClass("nbt.NBTBase")},
-                            nbt, "Facing", nbtFacing);
-                    if (type.equals("minecraft:item_frame") /*&& transformedFacing < 2*/) {
+                    if(lowercaseFacing) {
+                        NMSUtil.invokeNMS("nbt.NBTTagCompound", "a"/*"set"*/,
+                                new Class[]{String.class, NMSUtil.getNMSClass("nbt.NBTBase")},
+                                nbt, "facing", nbtFacing);
+                    } else {
+                        NMSUtil.invokeNMS("nbt.NBTTagCompound", "a"/*"set"*/,
+                                new Class[]{String.class, NMSUtil.getNMSClass("nbt.NBTBase")},
+                                nbt, "Facing", nbtFacing);
+                    }
+                    if (type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame") /*&& transformedFacing < 2*/) {
+//Logger.getGlobal().info("item rotation");
                         //byte f(String)
                         Byte itemRot = (Byte) NMSUtil.invokeNMS("nbt.NBTTagCompound", "f"/*"getByte"*/,
                                 new Class[]{String.class},
@@ -639,6 +669,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                 int tileZ = tileCoord(newPosition.getZ());
                 if (type.equals("minecraft:painting")) {
 //Logger.getGlobal().log(Level.INFO,"painting: {0} {1} {2} {3} {4}",new Object[]{facing,newPosition.getX(),tileX,newPosition.getZ(),tileZ});
+//Logger.getGlobal().info("painting fix");
                     if (facing == 2 && (newPosition.getX() - tileX > 0.6)) {
                         tileX++;
                     } else if (facing == 3 && (newPosition.getZ() - tileZ > 0.6)) {
@@ -686,7 +717,10 @@ public class MCMEPlotFormat implements PlotStorageFormat {
 
                 //create entity
 //Logger.getGlobal().log(Level.INFO, "************************************");
-//Logger.getGlobal().log(Level.INFO, "NBT: "+nbt.toString());
+//type = (String) NMSUtil.invokeNMS("nbt.NBTTagCompound", "l"/*"getString"*/,
+//        new Class[]{String.class},
+//        nbt, "id");
+//Logger.getGlobal().info("id re-reread: "+type);
                 //WorldServer getHandle()
                 Object nmsWorld = NMSUtil.invokeCraftBukkit("CraftWorld", "getHandle", null,
                         location.getWorld());
