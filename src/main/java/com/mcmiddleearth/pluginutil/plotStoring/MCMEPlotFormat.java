@@ -88,13 +88,8 @@ public class MCMEPlotFormat implements PlotStorageFormat {
     @Override
     public void save(IStoragePlot plot, DataOutputStream out, StoragePlotSnapshot snap) throws IOException{
         try {
-            /*String name = world.getName();
-            byte[] nameBytes = name.getBytes(Charset.forName("UTF-8"));
-            out.write(nameBytes.length);
-            out.write(nameBytes);*/
-            //List<Object> complexBlocks = new ArrayList<>();
             out.writeInt(VERSION);
-            byte[] worldNameBytes = plot.getWorld().getName().getBytes(Charset.forName("UTF-8"));
+            byte[] worldNameBytes = plot.getWorld().getName().getBytes(StandardCharsets.UTF_8);
             out.writeInt(worldNameBytes.length);
             out.write(worldNameBytes);
             out.writeInt(plot.getLowCorner().getBlockX());
@@ -129,14 +124,14 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             out.writeInt(palette.size()); //write length of palette
             for(int i=0; i<palette.size();i++) {
                 String blockDataString = palette.get(i).getAsString();
-                byte[] blockDataBytes = blockDataString.getBytes(Charset.forName("UTF-8"));
+                byte[] blockDataBytes = blockDataString.getBytes(StandardCharsets.UTF_8);
                 out.writeInt(blockDataBytes.length); //write length of next blockdata
                 out.write(blockDataBytes);
             }
             out.writeInt(biomePalette.size()); //write length of palette
             for(int i=0; i<biomePalette.size();i++) {
                 String biomeDataString = biomePalette.get(i).name();
-                byte[] biomeDataBytes = biomeDataString.getBytes(Charset.forName("UTF-8"));
+                byte[] biomeDataBytes = biomeDataString.getBytes(StandardCharsets.UTF_8);
                 out.writeInt(biomeDataBytes.length); //write length of next blockdata
                 out.write(biomeDataBytes);
             }
@@ -165,14 +160,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
 //Logger.getGlobal().info("saving nbt TileEntity: "+nbt.toString());
                 NMSUtil.invokeNMS("nbt.NBTCompressedStreamTools","a",argsClasses,null,nbt,(DataOutput)out);
             }
-            Collection<Entity> entities = snap.getEntities();/*plot.getWorld()
-                 .getNearbyEntities(new BoundingBox(plot.getLowCorner().getBlockX(),
-                                                    plot.getLowCorner().getBlockY(),
-                                                    plot.getLowCorner().getBlockZ(),
-                                                    plot.getHighCorner().getBlockX(),
-                                                    plot.getHighCorner().getBlockY(),
-                                                    plot.getHighCorner().getBlockZ()),
-                        new MCMEEntityFilter());*/
+            Collection<Entity> entities = snap.getEntities();
             out.writeInt(entities.size());
             for(Entity entity: entities) {
                 Object nbt = NBTTagUtil.createNBTCompound();
@@ -258,7 +246,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
         int worldNameDataLength = in.readInt();
         byte[] worldNameByteData = new byte[worldNameDataLength];
         in.readFully(worldNameByteData);
-        String worldName =  new String(worldNameByteData,Charset.forName("UTF-8"));
+        String worldName =  new String(worldNameByteData, StandardCharsets.UTF_8);
         World originalWorld = Bukkit.getWorld(worldName);
         Location originalLoc;
         final Location location;
@@ -339,7 +327,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             int dataLength = in.readInt();
             byte[] byteData = new byte[dataLength];
             in.readFully(byteData);
-            String biomeName = new String(byteData, Charset.forName("UTF-8"));
+            String biomeName = new String(byteData, StandardCharsets.UTF_8);
             //Logger.getGlobal().info("Biome name: "+biomeName);
             Biome biome = Biome.PLAINS;
             try {
@@ -368,20 +356,6 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             secondStart = rotatedLowCorner.getBlockZ();
             secondEnd = rotatedHighCorner.getBlockZ();
             secondInc = zIncrement;
-            /*if(flip[0]) {
-//Logger.getGlobal().info("flip x");
-                temp = firstStart;
-                firstStart = firstEnd;
-                firstEnd = temp;
-                firstInc = -firstInc;
-            }
-            if(flip[2]) {
-//Logger.getGlobal().info("flip z");
-                temp = secondStart;
-                secondStart = secondEnd;
-                secondEnd = temp;
-                secondInc = - secondInc;
-            }*/
         } else {
             firstStart = rotatedLowCorner.getBlockZ();
             firstEnd = rotatedHighCorner.getBlockZ();
@@ -389,20 +363,6 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             secondStart = rotatedLowCorner.getBlockX();
             secondEnd = rotatedHighCorner.getBlockX();
             secondInc = xIncrement;
-            /*if(flip[2]) {
-//Logger.getGlobal().info("flip x rotated");
-                temp = firstStart;
-                firstStart = firstEnd;
-                firstEnd = temp;
-                firstInc = -firstInc;
-            }
-            if(flip[0]) {
-//Logger.getGlobal().info("flip z rotated");
-                temp = secondStart;
-                secondStart = secondEnd;
-                secondEnd = temp;
-                secondInc = - secondInc;
-            }*/
         }
         BlockData air = Bukkit.createBlockData(Material.AIR);
         for(int i = firstStart;
@@ -473,14 +433,6 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             for (Object nbt : tileEntityDatas) {
                 try {
                     Object nmsWorld = NMSUtil.invokeCraftBukkit("CraftWorld", "getHandle", null, location.getWorld());
-                    /*Object blockposition = NMSUtil.createNMSObject("core.BlockPosition",
-                            new Class[]{int.class, int.class, int.class},
-                            NMSUtil.invokeNMS("nbt.NBTTagCompound", "h",//getInt",
-                                    new Class[]{String.class}, nbt, "x"),
-                            NMSUtil.invokeNMS("nbt.NBTTagCompound", "h",
-                                    new Class[]{String.class}, nbt, "y"),
-                            NMSUtil.invokeNMS("nbt.NBTTagCompound", "h",
-                                    new Class[]{String.class}, nbt, "z"));*/
                     Object blockposition = NMSUtil.invokeNMS("world.level.block.entity.TileEntity","c",
                             new Class[]{NMSUtil.getNMSClass("nbt.NBTTagCompound")},null, nbt);
                     Class[] argsClasses = new Class[]{int.class, int.class, int.class};
@@ -564,22 +516,6 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                         1, NBTTagUtil.createNBTTagDouble(newPosition.getY()));
                 NMSUtil.invokeNMS("nbt.NBTTagList", "a", argsClassesA, list,
                         2, NBTTagUtil.createNBTTagDouble(newPosition.getZ()));
-                /*NMSUtil.invokeNMS("NBTTagList","a",argsClassesA,list,
-                                  0,NMSUtil.createNMSObject("NBTTagDouble",argsClassesB,
-                                            ((double)NMSUtil.invokeNMS("NBTTagList", "k",
-                                                    argsClassesC,list,0))
-                                             +shift.getBlockX()));
-                NMSUtil.invokeNMS("NBTTagList","a",argsClassesA,list,
-                                  1,NMSUtil.createNMSObject("NBTTagDouble",argsClassesB,
-                                            ((double)NMSUtil.invokeNMS("NBTTagList", "k",
-                                                    argsClassesC,list,1))
-                                             +shift.getBlockY()));
-                NMSUtil.invokeNMS("NBTTagList","a",argsClassesA,list,
-                                  2,NMSUtil.createNMSObject("NBTTagDouble",argsClassesB,
-                                            ((double)NMSUtil.invokeNMS("NBTTagList", "k",
-                                                    argsClassesC,list,2))
-                                             +shift.getBlockZ()));*/
-                //list.a(1,new NBTTagDouble(list.k(1)+shift.getBlockY()));
                 //list.a(2,new NBTTagDouble(list.k(2)+shift.getBlockZ()));
                 //NBTBase a(String, NBTbase)
                 NMSUtil.invokeNMS("nbt.NBTTagCompound", "a"/*"set"*/,
@@ -609,17 +545,8 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                         nbt, "id");
                 Byte facing = 0;
 //Logger.getGlobal().info("id: "+type);
-//type = type.replace("minecraft:","");
-//                type = "minecraft:"+armor_stand;
-//                NMSUtil.invokeNMS("nbt.NBTTagCompound","a",null, nbt,"id",type);
-//type = (String) NMSUtil.invokeNMS("nbt.NBTTagCompound", "l"/*"getString"*/,
-//        new Class[]{String.class},
- //       nbt, "id");
-//Logger.getGlobal().info("id reread: "+type);
-//Logger.getGlobal().info("id: "+type);
                 if (type.equals("minecraft:painting") || type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
 //Logger.getGlobal().log(Level.INFO, "NBT: "+nbt.toString());
-//System.out.println("NBT: "+nbt.toString());
                     //byte f(String)
                     boolean lowercaseFacing;
                     if(NBTTagUtil.hasKey(nbt, "Facing")) {
@@ -655,6 +582,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                                 nbt, "ItemRotation");
 //Logger.getGlobal().info("itemFrame: "+newPosition.getX()+" "+newPosition.getY()+" "+newPosition.getZ()+" "+facing +" "+itemRot);
                         itemRot = rotation.transformItemRotation(facing, itemRot);
+//Logger.getGlobal().info("transformed item rot: "+itemRot);
                         Object nbtItemRot = NBTTagUtil.createNBTTagByte(itemRot);
                         //NBTBaste a(String, NBTBase)
                         NMSUtil.invokeNMS("nbt.NBTTagCompound", "a"/*"set"*/,
@@ -667,15 +595,8 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                 int tileX = tileCoord(newPosition.getX());
                 int tileY = tileCoord(newPosition.getY());
                 int tileZ = tileCoord(newPosition.getZ());
-                if (type.equals("minecraft:painting")) {
-//Logger.getGlobal().log(Level.INFO,"painting: {0} {1} {2} {3} {4}",new Object[]{facing,newPosition.getX(),tileX,newPosition.getZ(),tileZ});
-//Logger.getGlobal().info("painting fix");
-                    if (facing == 2 && (newPosition.getX() - tileX > 0.6)) {
-                        tileX++;
-                    } else if (facing == 3 && (newPosition.getZ() - tileZ > 0.6)) {
-                        tileZ++;
-                    }
-                }
+//Logger.getGlobal().info("NewX: "+newPosition.getX() + " NewZ: "+newPosition.getZ());
+//Logger.getGlobal().info("TileX: "+tileX + " TileZ: "+tileZ);
                 Object nbtTileX = NBTTagUtil.createNBTTagInt(tileX);
                 Object nbtTileY = NBTTagUtil.createNBTTagInt(tileY);
                 Object nbtTileZ = NBTTagUtil.createNBTTagInt(tileZ);
@@ -715,12 +636,6 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                         new Class[]{String.class, NMSUtil.getNMSClass("nbt.NBTBase")},
                         nbt, "UUID", nbtIntArray);
 
-                //create entity
-//Logger.getGlobal().log(Level.INFO, "************************************");
-//type = (String) NMSUtil.invokeNMS("nbt.NBTTagCompound", "l"/*"getString"*/,
-//        new Class[]{String.class},
-//        nbt, "id");
-//Logger.getGlobal().info("id re-reread: "+type);
                 //WorldServer getHandle()
                 Object nmsWorld = NMSUtil.invokeCraftBukkit("CraftWorld", "getHandle", null,
                         location.getWorld());
