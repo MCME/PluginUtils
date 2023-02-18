@@ -380,7 +380,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                     z=i;
                 }
                 int biomeIndex = in.readInt();
-//Logger.getGlobal().info("biome index: "+biomeIndex);                    
+//Logger.getGlobal().info("biome index: "+biomeIndex);
                 Biome biome = biomePalette.get(biomeIndex);
 //Logger.getGlobal().info(""+biome);
                 if(biome != null && withBiome) {

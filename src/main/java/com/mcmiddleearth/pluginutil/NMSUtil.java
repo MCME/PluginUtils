@@ -19,6 +19,7 @@ package com.mcmiddleearth.pluginutil;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -245,4 +246,16 @@ public class NMSUtil {
             NMSUtil.invokeNMS("world.level.lighting.LightEngine", "a", new Class[]{blockPosition.getClass()/*,boolean.class*/}, lightEngine, blockPosition/*,true*/);
         });
     }
+
+    public static Object getTileEntity(Block block) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
+        Object nmsWorld = block.getWorld().getClass().getMethod("getHandle")
+                .invoke(block.getWorld());
+        Object blockPosition = NMSUtil.getNMSClass("core.BlockPosition").getConstructor(int.class,int.class,int.class)
+                .newInstance(block.getX(),block.getY(),block.getZ());
+        return nmsWorld.getClass().getMethod("getTileEntity", blockPosition.getClass())
+                .invoke(nmsWorld, blockPosition);
+    }
+
+
+
 }

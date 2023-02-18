@@ -253,7 +253,7 @@ public final class FancyMessage {
         return string.replaceAll("\"", "__stRe__\"").replaceAll("__stRe__", "\\\\");
     }
     
-    private String colorString(ChatColor color) {
+    public static String colorString(ChatColor color) {
         return switch (color) {
             case BLACK -> "black";
             case DARK_BLUE -> "dark_blue";
@@ -280,7 +280,7 @@ public final class FancyMessage {
         };
     }
 
-    private ChatColor chatColor(char colorCode) {
+    public static ChatColor chatColor(char colorCode) {
         return switch(colorCode) {
             case '0' -> ChatColor.BLACK;
             case '1' -> ChatColor.DARK_BLUE;
