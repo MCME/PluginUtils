@@ -168,7 +168,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                                                              null, entity);
                 NMSUtil.invokeNMS("nbt.NBTTagCompound","a",
                         new Class[]{String.class, String.class} , nbt,"id",
-                        NMSUtil.invokeNMS("world.entity.Entity","bq",null, nmsEntity));
+                        NMSUtil.invokeNMS("world.entity.Entity","bp",null, nmsEntity));
                 nbt = NMSUtil.invokeNMS("world.entity.Entity","f",null, nmsEntity,nbt);
                 Class[] argsClasses = new Class[]{NMSUtil.getNMSClass("nbt.NBTTagCompound"),DataOutput.class};
                 NMSUtil.invokeNMS("nbt.NBTCompressedStreamTools","a",argsClasses,null,nbt,(DataOutput)out);
@@ -436,17 +436,17 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                     Object blockposition = NMSUtil.invokeNMS("world.level.block.entity.TileEntity","c",
                             new Class[]{NMSUtil.getNMSClass("nbt.NBTTagCompound")},null, nbt);
                     Class[] argsClasses = new Class[]{int.class, int.class, int.class};
-                    Object newPosition = NMSUtil.invokeNMS("core.BlockPosition", "c", argsClasses, blockposition, shift.getBlockX(),
+                    Object newPosition = NMSUtil.invokeNMS("core.BaseBlockPosition", "c", argsClasses, blockposition, shift.getBlockX(),
                             shift.getBlockY(),
                             shift.getBlockZ());
                     final Vector rotatedVector = rotation.transformVector(NMSUtil.toVector(newPosition), true);
                     newPosition = NMSUtil.toBlockPosition(rotatedVector);
                     NMSUtil.invokeNMS("nbt.NBTTagCompound", "a"/*setInt*/, new Class[]{String.class, int.class}, nbt, "x",
-                            NMSUtil.invokeNMS("core.BlockPosition", "u"/*"getX"*/, null, newPosition));
+                            NMSUtil.invokeNMS("core.BaseBlockPosition", "u"/*"getX"*/, null, newPosition));
                     NMSUtil.invokeNMS("nbt.NBTTagCompound", "a", new Class[]{String.class, int.class}, nbt, "y",
-                            NMSUtil.invokeNMS("core.BlockPosition", "v"/*"getY"*/, null, newPosition));
+                            NMSUtil.invokeNMS("core.BaseBlockPosition", "v"/*"getY"*/, null, newPosition));
                     NMSUtil.invokeNMS("nbt.NBTTagCompound", "a", new Class[]{String.class, int.class}, nbt, "z",
-                            NMSUtil.invokeNMS("core.BlockPosition", "w"/*"getZ"*/, null, newPosition));
+                            NMSUtil.invokeNMS("core.BaseBlockPosition", "w"/*"getZ"*/, null, newPosition));
                     Object chunk = NMSUtil.invokeNMS("world.level.World", "l"/*"getChunkAtWorldCoords"*/,
                             new Class[]{newPosition.getClass()}, nmsWorld, newPosition);
                     //IBlockState a_(BlockPosition)
