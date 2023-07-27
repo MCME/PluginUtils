@@ -177,7 +177,7 @@ public class LocalTransformation {
             } else if(flips[0] && face%2 == 1) {
                 return (byte) ((face+2)%4);
             }
-        } else if(type.equals("minecraft:item_frame")) {
+        } else if(type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
             if(flips[1] && face <= 1) {
                 return (byte) ((face+1)%2);
             } else if(flips[2] && (face == 2 || face == 3)) {
@@ -194,7 +194,7 @@ public class LocalTransformation {
             if(face >=0) {
                 return (byte) ((face+rotations)%4);
             }
-        } else if(type.equals("minecraft:item_frame")) {
+        } else if(type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
             if(face > 1) {
                 byte[] order = new byte[]{5,3,4,2};
                 for(int i=0; i< order.length;i++) {
@@ -224,111 +224,37 @@ public class LocalTransformation {
         if(flips[2] && (facing==0 || facing == 1)) {
             itemRot = flipY(itemRot);
         } else if(flips[2]) {
-            itemRot = flipXVerticalFacing(itemRot);
-        }
-        if(flips[1] && (facing==0 || facing == 1)) {
-            itemRot = flipY(itemRot);
-        } else if(flips[1]) {
-            itemRot = flipYVerticalFacing(itemRot);
-        }
-        if(flips[0] && (facing==0 || facing == 1)) {
             itemRot = flipX(itemRot);
-        } else if(flips[0]) {
-            itemRot = flipXVerticalFacing(itemRot);
+        }
+        if(flips[1]) {
+            itemRot = flipY(itemRot);
+        }
+        if(flips[0]) {
+            itemRot = flipX(itemRot);
         }
         return itemRot;
     }
     
-    private Byte flipXVerticalFacing(Byte itemRot) {
-        Byte flippedRot = itemRot;
-        switch(itemRot) {
-            case 2:
-            case 6:
-               flippedRot = (byte) ((itemRot+4)%8);
-               break;
-            case 1:
-               flippedRot = 7;
-               break;
-            case 7:
-               flippedRot = 1;
-               break;
-            case 3:
-               flippedRot = 5;
-               break;
-            case 5:
-               flippedRot = 3;
-               break;
-        }
-        return flippedRot;
-    }
-    
-    private Byte flipYVerticalFacing(Byte itemRot) {
-        Byte flippedRot = itemRot;
-        switch(itemRot) {
-            case 0:
-            case 4:
-               flippedRot = (byte) ((itemRot+4)%8);
-               break;
-            case 1:
-               flippedRot = 3;
-               break;
-            case 3:
-               flippedRot = 1;
-               break;
-            case 5:
-               flippedRot = 7;
-               break;
-            case 7:
-               flippedRot = 5;
-               break;
-        }
-        return flippedRot;
-    }
-    
     private Byte flipX(Byte itemRot) {
-        Byte flippedRot = itemRot;
-        switch(itemRot) {
-            case 1:
-            case 5:
-               flippedRot = (byte) ((itemRot+4)%8);
-               break;
-            case 0:
-               flippedRot = 6;
-               break;
-            case 6:
-               flippedRot = 0;
-               break;
-            case 2:
-               flippedRot = 4;
-               break;
-            case 4:
-               flippedRot = 2;
-               break;
-        }
-        return flippedRot;
+        return switch (itemRot) {
+            case 2, 6 -> (byte) ((itemRot + 4) % 8);
+            case 1 -> 7;
+            case 7 -> 1;
+            case 3 -> 5;
+            case 5 -> 3;
+            default -> itemRot;
+        };
     }
     
     private Byte flipY(Byte itemRot) {
-        Byte flippedRot = itemRot;
-        switch(itemRot) {
-            case 3:
-            case 7:
-               flippedRot = (byte) ((itemRot+4)%8);
-               break;
-            case 0:
-               flippedRot = 2;
-               break;
-            case 2:
-               flippedRot = 0;
-               break;
-            case 4:
-               flippedRot = 6;
-               break;
-            case 6:
-               flippedRot = 4;
-               break;
-        }
-        return flippedRot;
+        return switch (itemRot) {
+            case 0, 4 -> (byte) ((itemRot + 4) % 8);
+            case 1 -> 3;
+            case 3 -> 1;
+            case 5 -> 7;
+            case 7 -> 5;
+            default -> itemRot;
+        };
     }
     
 }

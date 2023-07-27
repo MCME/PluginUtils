@@ -16,6 +16,13 @@
  */
 package com.mcmiddleearth.pluginutil;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -23,12 +30,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 
 /**
  * Utiliy class for NMS methods to a PlayerConnection using reflection
@@ -52,6 +53,7 @@ public class NMSUtil {
         playerConnection.getClass().getMethod("a"/*"sendPacket"*/, getNMSClass("network.protocol.Packet")).invoke(playerConnection, packet);
     }
 
+    /* cant find on 1.18 or 1.19
     public static Object getTileEntity(Block block) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
         Object nmsWorld = block.getWorld().getClass().getMethod("getHandle")
                                                           .invoke(block.getWorld());
@@ -59,8 +61,9 @@ public class NMSUtil {
                                       .newInstance(block.getX(),block.getY(),block.getZ());
         return nmsWorld.getClass().getMethod("getTileEntity", blockPosition.getClass())
                                   .invoke(nmsWorld, blockPosition);
-    }
+    }*/
     
+    /* no longer neeeded?
     public static void updatePlayerChunks(Location low, Location high) {
         if(true) return; //not implemented in 1.14
         Object nmsWorld = NMSUtil.invokeCraftBukkit("CraftWorld","getHandle",null,low.getWorld());
@@ -93,11 +96,11 @@ public class NMSUtil {
                                 || (NMSUtil.getCraftBukkitClass(("")NMSUtil.invokeNMS("EntityPlayer","getBukkitEntity",null,nmsPlayer)
                                           .getUniqueId().equals(player.getUniqueId())) {
                         }
-                    }*/
+                    }* /
                 }
             }
         }
-    }
+    }*/
     
     public static Object invokeCraftBukkit(String className, String methodName, Class[] argsClasses, 
                                            Object object, Object... args) {
@@ -243,4 +246,16 @@ public class NMSUtil {
             NMSUtil.invokeNMS("world.level.lighting.LightEngine", "a", new Class[]{blockPosition.getClass()/*,boolean.class*/}, lightEngine, blockPosition/*,true*/);
         });
     }
+
+    public static Object getTileEntity(Block block) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
+        Object nmsWorld = block.getWorld().getClass().getMethod("getHandle")
+                .invoke(block.getWorld());
+        Object blockPosition = NMSUtil.getNMSClass("core.BlockPosition").getConstructor(int.class,int.class,int.class)
+                .newInstance(block.getX(),block.getY(),block.getZ());
+        return nmsWorld.getClass().getMethod("getTileEntity", blockPosition.getClass())
+                .invoke(nmsWorld, blockPosition);
+    }
+
+
+
 }

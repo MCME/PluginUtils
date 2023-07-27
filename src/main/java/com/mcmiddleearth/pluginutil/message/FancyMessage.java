@@ -87,8 +87,9 @@ public final class FancyMessage {
      * @return Message with new text appended
      */
     public FancyMessage addSimple(String text){
-        data.add(new String[]{text,null,null});
-        return this;
+        //data.add(new String[]{text,null,null});
+        return addFancy(text,null,null);
+        //return this;
     }
 
     /**
@@ -98,8 +99,9 @@ public final class FancyMessage {
      * @return Message with new text appended
      */
     public FancyMessage addClickable(String text, String onClickCommand) {
-        data.add(new String[]{text,onClickCommand,null});
-        return this;
+        //data.add(new String[]{text,onClickCommand,null});
+        return addFancy(text, onClickCommand, null);
+        //return this;
     }
 
     /**
@@ -109,8 +111,9 @@ public final class FancyMessage {
      * @return Message with new text appended
      */
     public FancyMessage addTooltipped(String text, String onHoverText) {
-        data.add(new String[]{text,null,onHoverText});
-        return this;
+        //data.add(new String[]{text,null,onHoverText});
+        return addFancy(text, null, onHoverText);
+        //return this;
     }
 
     /**
@@ -121,7 +124,51 @@ public final class FancyMessage {
      * @return Message with new text appended
      */
     public FancyMessage addFancy(String text, String onClickCommand, String onHoverText) {
-        data.add(new String[]{text,onClickCommand,onHoverText});
+        //JsonMessageParser.Format format = new JsonMessageParser.Format();
+        String color = colorString(baseColor);
+        while(text.length()>0) {
+            String format = "";
+            int colorPos = text.indexOf("§");
+            int hexColorPos = text.indexOf("#");
+            ChatColor chatColor = null;
+            if(colorPos != 0 && hexColorPos != 0) {
+                chatColor = baseColor;
+            } else if(colorPos == 0){
+                chatColor = chatColor(text.charAt(1));
+                text = text.substring(2);
+            } else {
+                color = text.substring(0,7);
+                text = text.substring(7);
+            }
+            if(chatColor != null && chatColor.isColor()) {
+                color = colorString(chatColor);
+            } else if(chatColor != null && chatColor.isFormat()) {
+                switch (chatColor) {
+                    case BOLD -> format = ", \"bold\" : true";
+                    case UNDERLINE -> format  = ", \"underlined\" : true";
+                    case STRIKETHROUGH -> format  = ", \"strikethrough\" : true";
+                    case MAGIC -> format  = ", \"obfuscated\" : true";
+                    case ITALIC -> format  = ", \"italic\" : true";
+                }
+            } else if(chatColor != null) {
+                format = ", \"bold\" : false, \"underlined\" : false, \"strikethrough\" : false, \"obfuscated\" : false, \"italic\" : false";
+                color = colorString(baseColor);
+            }
+            colorPos = text.indexOf("§");
+            hexColorPos = text.indexOf("#");
+            String textPart;
+            if(colorPos < 0 && hexColorPos < 0) {
+                textPart = text;
+                text = "";
+            } else if(colorPos < 0 || (hexColorPos >= 0 && hexColorPos < colorPos)) {
+                textPart = text.substring(0, hexColorPos);
+                text = text.substring(hexColorPos);
+            } else{
+                textPart = text.substring(0, colorPos);
+                text = text.substring(colorPos);
+            }
+            data.add(new String[]{textPart, onClickCommand, onHoverText, color, format});
+        }
         return this;
     }
     
@@ -163,18 +210,16 @@ public final class FancyMessage {
             String message = messageData[0];
             String command = messageData[1];
             String hoverText = messageData[2];
-                if(message.contains("\"")) {
-                }
+            String color = (messageData.length>3?messageData[3]:colorString(baseColor));
+            String format = (messageData.length>4?messageData[4]:"");
             message = replaceQuotationMarks(message);
-                if(message.contains("\"")) {
-                }
             if(first) {
                 first = false; 
             }
             else {
                 rawText = rawText.concat(",");
             }
-            rawText = rawText.concat("{\"text\":\""+message+"\",\"color\":\""+baseColorString()+"\"");
+            rawText = rawText.concat("{\"text\":\""+message+"\",\"color\":\""+color+"\""+format);
             if(command!=null) {
                 String thisAction = action;
                 if(command.startsWith("http")) {
@@ -183,17 +228,11 @@ public final class FancyMessage {
                 command = replaceQuotationMarks(command);
                 rawText = rawText.concat(",\"clickEvent\":{\"action\":\""+thisAction+"\",\"value\":\"");
                 rawText = rawText.concat(command+"\"}");
-                //clickEvent = true;
             }
             if(hoverText!=null) {
                 hoverText = replaceQuotationMarks(hoverText);
-                if(hoverText.contains("\"")) {
-                }
-                //if(clickEvent) {
-                //    rawText = rawText.concat(",");
-                //}
-                rawText = rawText.concat(",\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"");
-                rawText = rawText.concat(hoverText+"\"}");
+                rawText = rawText.concat(",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":");
+                rawText = rawText.concat(JsonMessageParser.parseColoredText(hoverText)+"}");
             }
             rawText = rawText.concat("}");
         }
@@ -214,53 +253,58 @@ public final class FancyMessage {
         return string.replaceAll("\"", "__stRe__\"").replaceAll("__stRe__", "\\\\");
     }
     
-    private String baseColorString() {
-        switch(baseColor) {
-            case BLACK:
-                return "black"; 
-            case DARK_BLUE:
-                return "dark_blue"; 
-            case DARK_GREEN:
-                return "dark_green"; 
-            case DARK_AQUA:
-                return "dark_aqua"; 
-            case DARK_RED:
-                return "dark_red"; 
-            case DARK_PURPLE:
-                return "dark_purple"; 
-            case GOLD:
-                return "gold"; 
-            case GRAY:
-                return "gray"; 
-            case DARK_GRAY:
-                return "dark_gray"; 
-            case BLUE:
-                return "blue";
-            case GREEN:
-                return "green"; 
-            case AQUA:
-                return "aqua"; 
-            case RED:
-                return "red"; 
-            case LIGHT_PURPLE:
-                return "light_purple"; 
-            case YELLOW:
-                return "yellow"; 
-            case WHITE:
-                return "white"; 
-            case BOLD:
-                return "bold"; 
-            case UNDERLINE:
-                return "underline"; 
-            case ITALIC:
-                return "italic"; 
-            case STRIKETHROUGH:
-                return "strikethrough";
-            case MAGIC:
-                return "obfuscated";
-            default:
-                return "reset";
-        }
+    public static String colorString(ChatColor color) {
+        return switch (color) {
+            case BLACK -> "black";
+            case DARK_BLUE -> "dark_blue";
+            case DARK_GREEN -> "dark_green";
+            case DARK_AQUA -> "dark_aqua";
+            case DARK_RED -> "dark_red";
+            case DARK_PURPLE -> "dark_purple";
+            case GOLD -> "gold";
+            case GRAY -> "gray";
+            case DARK_GRAY -> "dark_gray";
+            case BLUE -> "blue";
+            case GREEN -> "green";
+            case AQUA -> "aqua";
+            case RED -> "red";
+            case LIGHT_PURPLE -> "light_purple";
+            case YELLOW -> "yellow";
+            case WHITE -> "white";
+            case BOLD -> "bold";
+            case UNDERLINE -> "underline";
+            case ITALIC -> "italic";
+            case STRIKETHROUGH -> "strikethrough";
+            case MAGIC -> "obfuscated";
+            default -> "reset";
+        };
+    }
+
+    public static ChatColor chatColor(char colorCode) {
+        return switch(colorCode) {
+            case '0' -> ChatColor.BLACK;
+            case '1' -> ChatColor.DARK_BLUE;
+            case '2' -> ChatColor.DARK_GREEN;
+            case '3' -> ChatColor.DARK_AQUA;
+            case '4' -> ChatColor.DARK_RED;
+            case '5' -> ChatColor.DARK_PURPLE;
+            case '6' -> ChatColor.GOLD;
+            case '7' -> ChatColor.GRAY;
+            case '8' -> ChatColor.DARK_GRAY;
+            case '9' -> ChatColor.BLUE;
+            case 'a' -> ChatColor.GREEN;
+            case 'b' -> ChatColor.AQUA;
+            case 'c' -> ChatColor.RED;
+            case 'd' -> ChatColor.LIGHT_PURPLE;
+            case 'e' -> ChatColor.YELLOW;
+            case 'f' -> ChatColor.WHITE;
+            case 'l' -> ChatColor.BOLD;
+            case 'n' -> ChatColor.UNDERLINE;
+            case 'o' -> ChatColor.ITALIC;
+            case 'm' -> ChatColor.STRIKETHROUGH;
+            case 'k' -> ChatColor.MAGIC;
+            default -> ChatColor.RESET;
+        };
     }
 
     public List<String[]> getData() {

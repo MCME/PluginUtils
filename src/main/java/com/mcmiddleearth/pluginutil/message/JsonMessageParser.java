@@ -2,8 +2,6 @@ package com.mcmiddleearth.pluginutil.message;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import org.json.simple.JSONObject;
 
 public class JsonMessageParser {
 
@@ -84,7 +82,7 @@ public class JsonMessageParser {
                             case '0': setColor(current, status,"black"); break;
                             case '1': setColor(current, status,"dark_blue"); break;
                             case '2': setColor(current, status,"dark_green"); break;
-                            case '3': setColor(current, status,"dark_cyan"); break;
+                            case '3': setColor(current, status,"dark_aqua"); break;
                             case '4': setColor(current, status,"dark_red"); break;
                             case '5': setColor(current, status,"purple"); break;
                             case '6': setColor(current, status,"gold"); break;
@@ -99,9 +97,7 @@ public class JsonMessageParser {
                         }
                         oldColorSplit[j] = oldColorSplit[j].substring(1);
                     }
-                    if(oldColorSplit[j].length()>0) {
-                        current.addProperty("text",oldColorSplit[j]);
-                    }
+                    current.addProperty("text", oldColorSplit[j]);
                 }
             }
         }
@@ -114,6 +110,7 @@ public class JsonMessageParser {
         if(status.strikethrough) current.addProperty("strikethrough",false);
         if(status.underline) current.addProperty("underline",false);
         if(status.italic) current.addProperty("italic",false);
+        current.addProperty("color",color);
     }
 
     private static class Format {

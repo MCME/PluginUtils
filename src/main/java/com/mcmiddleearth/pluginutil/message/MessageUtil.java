@@ -145,20 +145,14 @@ public class MessageUtil {
 
     public static void sendRawMessage(Player sender, String message) {
         try {
-            Object chatBaseComponent = NMSUtil.getNMSClass("network.chat.IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, message);
-            Object chatMessageType = NMSUtil.invokeNMS("network.chat.ChatMessageType", "a", new Class[]{byte.class}, null, (byte)0);
-            Constructor<?> titleConstructor = NMSUtil.getNMSClass("network.protocol.game.PacketPlayOutChat").getConstructor(NMSUtil.getNMSClass("network.chat.IChatBaseComponent"),
-                                                                                                      NMSUtil.getNMSClass("network.chat.ChatMessageType"),
-                                                                                                      UUID.class);
-            Object chatPacket = titleConstructor.newInstance(chatBaseComponent, chatMessageType, sender.getUniqueId());
+            Object chatMutableComponent = NMSUtil.getNMSClass("network.chat.IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, message);
+            Constructor<?> packetConstructor = NMSUtil.getNMSClass("network.protocol.game.ClientboundSystemChatPacket")
+                    .getConstructor(NMSUtil.getNMSClass("network.chat.IChatBaseComponent"), boolean.class);
+            Object chatPacket = packetConstructor.newInstance(chatMutableComponent, false);
             NMSUtil.sendPacket(sender, chatPacket);
-            /*((CraftPlayer) sender).getHandle()
-            .playerConnection
-            .sendPacket(new PacketPlayOutChat(IChatBaseComponent.ChatSerializer
-            .a(message)));*/
         } catch(Error | Exception ex ) {
             Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, null, ex);
-            Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Error in Minigames plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/tellraw ...' instead of directly sending message packets.");
+            Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Error in PluginUtils plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/tellraw ...' instead of directly sending message packets.");
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName()+ " " + message);
         }
     }
