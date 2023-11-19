@@ -213,11 +213,12 @@ public class NMSUtil {
     }
     
     public static void calcLight(Location loc) {
+        Object nmsChunkStatus = NMSUtil.getNMSField("world.level.chunk.ChunkStatus", "l", null);
         Object blockPosition = NMSUtil.createNMSObject("core.BlockPosition", new Class[]{int.class,int.class,int.class},
                                                        loc.getBlockX(),loc.getBlockY(), loc.getBlockZ());
 //Logger.getGlobal().info("blocPosition "+blockPosition);
         Chunk chunk = loc.getChunk();
-        Object nmsChunk = NMSUtil.invokeCraftBukkit("CraftChunk", "getHandle", new Class[0], chunk);
+        Object nmsChunk = NMSUtil.invokeCraftBukkit("CraftChunk", "getHandle", new Class[]{nmsChunkStatus.getClass()}, chunk, nmsChunkStatus);
 //Logger.getGlobal().info("nmsChunk"+nmsChunk);
         Object worldServer = NMSUtil.getNMSField("world.level.chunk.Chunk","q", nmsChunk);
 
@@ -230,7 +231,8 @@ public class NMSUtil {
     }
     
     public static void calcLight(Chunk chunk, List<Vector> positions) {
-        Object nmsChunk = NMSUtil.invokeCraftBukkit("CraftChunk", "getHandle", new Class[0], chunk);
+        Object nmsChunkStatus = NMSUtil.getNMSField("world.level.chunk.ChunkStatus", "l", null);
+        Object nmsChunk = NMSUtil.invokeCraftBukkit("CraftChunk", "getHandle", new Class[]{nmsChunkStatus.getClass()}, chunk, nmsChunkStatus);
 //Logger.getGlobal().info("nmsChunk"+nmsChunk);
         Object worldServer = NMSUtil.getNMSField("world.level.chunk.Chunk","q", nmsChunk);
 
