@@ -4,7 +4,7 @@ version: ${project.version}
 author: Eriol_Eandur
 load: STARTUP
 softdepend: [ProtocolLib,Essentials,WorldEdit,Dynmap]
-api-version: 1.19
+api-version: 1.20.4
 
 commands:
     dev:

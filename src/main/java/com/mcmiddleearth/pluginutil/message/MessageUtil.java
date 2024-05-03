@@ -17,7 +17,7 @@
 package com.mcmiddleearth.pluginutil.message;
 
 import com.mcmiddleearth.pluginutil.FileUtil;
-import com.mcmiddleearth.pluginutil.NMSUtil;
+import com.mcmiddleearth.pluginutil.nms.NMSUtil;
 import com.mcmiddleearth.pluginutil.NumericUtil;
 import com.mcmiddleearth.pluginutil.PluginUtilsPlugin;
 import java.io.File;
@@ -28,9 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -61,7 +59,7 @@ public class MessageUtil {
     
     private String INDENTED = "    ";
     
-    private static final int PAGE_LENGTH = 13;
+    public static final int PAGE_LENGTH = 10;
     
     private static final int LENGTH_OF_HOVER_LINE = 40;
 
@@ -100,7 +98,17 @@ public class MessageUtil {
     public String errorNoPrefix() {
         return ERROR+INDENTED;
     }
-        
+
+    public FancyMessage fancyMessage() {
+        return new FancyMessage(this);
+    }
+
+    public FancyMessage fancyErrorMessage() {
+        return new FancyMessage(MessageType.ERROR, this);
+    }
+
+
+
     public void sendErrorMessage(CommandSender sender, String message) {
         if (sender instanceof Player) {
             sender.sendMessage(ERROR + PREFIX + message);
@@ -151,8 +159,8 @@ public class MessageUtil {
             Object chatPacket = packetConstructor.newInstance(chatMutableComponent, false);
             NMSUtil.sendPacket(sender, chatPacket);
         } catch(Error | Exception ex ) {
-            Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, null, ex);
-            Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Error in PluginUtils plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/tellraw ...' instead of directly sending message packets.");
+            //Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, null, ex);
+            //Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Error in PluginUtils plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/tellraw ...' instead of directly sending message packets.");
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName()+ " " + message);
         }
     }
