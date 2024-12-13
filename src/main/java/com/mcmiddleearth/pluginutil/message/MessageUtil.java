@@ -17,18 +17,9 @@
 package com.mcmiddleearth.pluginutil.message;
 
 import com.mcmiddleearth.pluginutil.FileUtil;
-import com.mcmiddleearth.pluginutil.nms.NMSUtil;
 import com.mcmiddleearth.pluginutil.NumericUtil;
 import com.mcmiddleearth.pluginutil.PluginUtilsPlugin;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-
+import com.mcmiddleearth.pluginutil.nms.NMSUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -38,6 +29,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * Utility class to handle sending of fancy messages.
@@ -153,11 +153,13 @@ public class MessageUtil {
 
     public static void sendRawMessage(Player sender, String message) {
         try {
-            Object chatMutableComponent = NMSUtil.getNMSClass("network.chat.IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, message);
+            /*Object chatMutableComponent = NMSUtil.getNMSClass("network.chat.IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, message);
             Constructor<?> packetConstructor = NMSUtil.getNMSClass("network.protocol.game.ClientboundSystemChatPacket")
                     .getConstructor(NMSUtil.getNMSClass("network.chat.IChatBaseComponent"), boolean.class);
             Object chatPacket = packetConstructor.newInstance(chatMutableComponent, false);
             NMSUtil.sendPacket(sender, chatPacket);
+             */
+            throw new Exception();
         } catch(Error | Exception ex ) {
             //Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, null, ex);
             //Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Error in PluginUtils plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/tellraw ...' instead of directly sending message packets.");
