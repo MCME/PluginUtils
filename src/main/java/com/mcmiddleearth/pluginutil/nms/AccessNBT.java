@@ -216,4 +216,8 @@ public class AccessNBT {
         NMSUtil.invokeNMS("nbt.NBTTagList", "a", argsClassesA, list,
                 index, nbtBase);*/
     }
+
+    public static int size(Object list) {
+        return ((ListTag)list).size();
+    }
 }

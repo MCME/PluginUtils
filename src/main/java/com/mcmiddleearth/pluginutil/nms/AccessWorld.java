@@ -10,6 +10,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.CraftServer;
 
 public class AccessWorld {
 
@@ -51,12 +53,13 @@ public class AccessWorld {
     }
 
     public static Object createTileEntity(Object blockPosition, Object iBlockState, Object nbt) throws ClassNotFoundException {
-        BlockEntity.loadStatic((BlockPos) blockPosition, (BlockState) iBlockState, (CompoundTag) nbt, HolderLookup);
-        Class[] argsClasses = new Class[]{NMSUtil.getNMSClass("core.BlockPosition"),
+        HolderLookup.Provider provider = ((CraftServer)Bukkit.getServer()).getServer().registries().compositeAccess();
+        return BlockEntity.loadStatic((BlockPos) blockPosition, (BlockState) iBlockState, (CompoundTag) nbt, provider);
+        /*Class[] argsClasses = new Class[]{NMSUtil.getNMSClass("core.BlockPosition"),
                 NMSUtil.getNMSClass("world.level.block.state.IBlockData"),
                 NMSUtil.getNMSClass("nbt.NBTTagCompound")};
-        return NMSUtil.invokeNMS("world.level.block.entity.TileEntity", "a"/*"create"*/,
-                argsClasses, null, blockPosition, iBlockState, nbt/*,nmsWorld*/);
+        return NMSUtil.invokeNMS("world.level.block.entity.TileEntity", "a"/*"create"*,
+                argsClasses, null, blockPosition, iBlockState, nbt/*,nmsWorld*);*/
     }
 
     public static void setTileEntity(Object chunk, Object entity) throws ClassNotFoundException {

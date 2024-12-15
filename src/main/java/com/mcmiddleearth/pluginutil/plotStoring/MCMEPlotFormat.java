@@ -6,10 +6,7 @@
 package com.mcmiddleearth.pluginutil.plotStoring;
 
 import com.mcmiddleearth.pluginutil.nms.*;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
@@ -127,7 +124,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             }
             out.writeInt(biomePalette.size()); //write length of palette
             for(int i=0; i<biomePalette.size();i++) {
-                String biomeDataString = biomePalette.get(i).name();
+                String biomeDataString = biomePalette.get(i).getKey().getKey();
                 byte[] biomeDataBytes = biomeDataString.getBytes(StandardCharsets.UTF_8);
                 out.writeInt(biomeDataBytes.length); //write length of next blockdata
                 out.write(biomeDataBytes);
@@ -321,7 +318,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             //Logger.getGlobal().info("Biome name: "+biomeName);
             Biome biome = Biome.PLAINS;
             try {
-                biome = Biome.valueOf(biomeName);
+                biome = Registry.BIOME.get(NamespacedKey.minecraft(biomeName.toLowerCase()));//get(Registry.BIOME.getKey())//Biome.valueOf(biomeName);
             } catch (IllegalArgumentException ignore) {}
             //Logger.getGlobal().info("Biome palette entry: "+i+" "+biome);
             biomePalette.put(i, biome);
