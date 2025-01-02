@@ -10,7 +10,7 @@ public class AccessServer {
 
     @SuppressWarnings("unchecked")
     public static void addFreshEntity(Object nmsWorld, Object entity) throws ClassNotFoundException {
-        ((ServerLevel)nmsWorld).addFreshEntity(((Optional<Entity>) entity).get(),CreatureSpawnEvent.SpawnReason.CUSTOM);
+        ((ServerLevel)nmsWorld).addFreshEntity((Entity) entity,CreatureSpawnEvent.SpawnReason.CUSTOM);
         /*Class[] argsClasses = new Class[]{NMSUtil.getNMSClass("world.entity.Entity"),
                 CreatureSpawnEvent.SpawnReason.CUSTOM.getClass()};
         //boolean addFreshEntity(Entity, SpawnReason)

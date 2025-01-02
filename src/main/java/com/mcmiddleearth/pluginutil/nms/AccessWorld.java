@@ -23,14 +23,15 @@ public class AccessWorld {
         return NMSUtil.invokeNMS("world.entity.EntityTypes", "a", argsClasses, null, nbt, nmsWorld);*/
     }
 
-    public static Object getEntityId(Object nmsEntity) {
-        return ((Entity)nmsEntity).getId();
+    public static Object getEntityType(Object nmsEntity) {
+        String[] descriptionId = ((Entity)nmsEntity).getType().getDescriptionId().split("\\.");
+        return descriptionId[descriptionId.length-1];
         //return NMSUtil.invokeNMS("world.entity.Entity","bp",null, nmsEntity);
     }
 
     public static Object writeEntityNBT(Object nmsEntity, Object nbt) {
-        ((Entity) nmsEntity).saveWithoutId((CompoundTag) nbt);
-        return nmsEntity;
+        return ((Entity) nmsEntity).saveWithoutId((CompoundTag) nbt);
+        //return nmsEntity;
         //return NMSUtil.invokeNMS("world.entity.Entity","f",null, nmsEntity,nbt);
     }
 

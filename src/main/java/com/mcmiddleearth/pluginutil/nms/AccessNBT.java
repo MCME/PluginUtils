@@ -1,12 +1,13 @@
 package com.mcmiddleearth.pluginutil.nms;
 
+import com.mcmiddleearth.pluginutil.NumericUtil;
 import net.minecraft.nbt.*;
 
 import java.io.*;
 
 public class AccessNBT {
     public static void writeNBTToStream(Object nbt, DataOutput out) throws ClassNotFoundException, IOException {
-        NbtIo.writeCompressed((CompoundTag) nbt, (OutputStream) out);
+        NbtIo.write((CompoundTag) nbt, out);
 
        /* Class[] argsClasses = new Class[]{NMSUtil.getNMSClass("nbt.NBTTagCompound"), DataOutput.class};
 
@@ -15,20 +16,24 @@ public class AccessNBT {
     }
 
     public static Object readNBTFromStream(DataInput in) throws ClassNotFoundException, IOException {
-        return NbtIo.readCompressed((InputStream) in, new NbtAccounter(10000,100));
+        return NbtIo.read(in, new NbtAccounter(10000,100));
         /*Class[] argsClasses = new Class[]{DataInput.class, NMSUtil.getNMSClass("nbt.NBTReadLimiter")};
         return NMSUtil.invokeNMS("nbt.NBTCompressedStreamTools", "a", argsClasses, null,
                 in, NMSUtil.getNMSField("nbt.NBTReadLimiter", "a", null));*/
     }
 
     public static void setString(Object nbt, String key, Object value) {
-        ((CompoundTag)nbt).putString(key, (String) value);
+        ((CompoundTag)nbt).putString(key, value.toString());
         /*NMSUtil.invokeNMS("nbt.NBTTagCompound","a",
                 new Class[]{String.class, String.class} , nbt,key, value);*/
     }
 
     public static void setInt(Object nbt, String key, Object value) {
-        ((CompoundTag)nbt).putInt(key, (Integer) value);
+        if(value instanceof Integer intValue) {
+            ((CompoundTag) nbt).putInt(key, intValue);
+        } else if(value instanceof String stringValue && NumericUtil.isInt(stringValue)) {
+            ((CompoundTag) nbt).putInt(key, NumericUtil.getInt(stringValue));
+        }
         /*NMSUtil.invokeNMS("nbt.NBTTagCompound", "a"/*setInt*, new Class[]{String.class, int.class},
                 nbt, key, value);*/
 
