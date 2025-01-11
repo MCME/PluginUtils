@@ -157,7 +157,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                 Object nbt = AccessNBT.createNBTCompound();
                 Object nmsEntity = AccessCraftBukkit.getNMSEntity(entity);
                 String entityType = (String) AccessWorld.getEntityType(nmsEntity);
-Logger.getGlobal().info("Entity Description id: "+entityType);
+//Logger.getGlobal().info("Entity Description id: "+entityType);
                 AccessNBT.setString(nbt, "id", entityType);
                 nbt = AccessWorld.writeEntityNBT(nmsEntity, nbt);
                 AccessNBT.writeNBTToStream(nbt, out);
@@ -496,7 +496,7 @@ Logger.getGlobal().info("Entity Description id: "+entityType);
                 String type = AccessNBT.getString(nbt, "id");
                 Byte facing = 0;
 //Logger.getGlobal().info("id: "+type);
-                if (type.equals("minecraft:painting") || type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
+                if (EntityTypeUtil.isHanging(type)) {
 //Logger.getGlobal().log(Level.INFO, "NBT: "+nbt.toString());
                     //byte f(String)
                     boolean lowercaseFacing;
@@ -517,7 +517,7 @@ Logger.getGlobal().info("Entity Description id: "+entityType);
                     } else {
                         AccessNBT.setNBTBase(nbt, "Facing", nbtFacing);
                     }
-                    if (type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame") /*&& transformedFacing < 2*/) {
+                    if (EntityTypeUtil.isItemFrame(type) /*&& transformedFacing < 2*/) {
 //Logger.getGlobal().info("item rotation");
                         //byte f(String)
                         Byte itemRot = AccessNBT.getByte(nbt, "ItemRotation");
@@ -561,9 +561,9 @@ Logger.getGlobal().info("Entity Description id: "+entityType);
 
                 //WorldServer getHandle()
                 Object nmsWorld = AccessCraftBukkit.getWorldServer(location.getWorld());
-Logger.getGlobal().info("NBT: "+nbt);
+//Logger.getGlobal().info("NBT: "+nbt);
                 Object entity = AccessWorld.createEntity(nmsWorld, nbt);
-Logger.getGlobal().info("ENTITY: "+entity);
+//Logger.getGlobal().info("ENTITY: "+entity);
 
                 //add entity to world
                 AccessServer.addFreshEntity(nmsWorld, entity);

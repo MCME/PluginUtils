@@ -150,6 +150,10 @@ public class LocalTransformation {
                     ((Orientable)data).setAxis(Axis.Z);
                     break;
                 case Y:
+                    break;
+                case Z:
+                    ((Orientable)data).setAxis(Axis.X);
+                    break;
             }
         } else if(data instanceof MultipleFacing) {
             MultipleFacing clone = (MultipleFacing) data.clone();
@@ -171,13 +175,13 @@ public class LocalTransformation {
     }
     
     private byte flipHangingEntity(String type, byte face) {
-        if(type.equals("minecraft:painting")) {
+        if(EntityTypeUtil.isPainting(type)) {
             if(flips[2] && face%2 == 0) {
                 return (byte) ((face+2)%4);
             } else if(flips[0] && face%2 == 1) {
                 return (byte) ((face+2)%4);
             }
-        } else if(type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
+        } else if(EntityTypeUtil.isItemFrame(type)) {
             if(flips[1] && face <= 1) {
                 return (byte) ((face+1)%2);
             } else if(flips[2] && (face == 2 || face == 3)) {
@@ -190,11 +194,11 @@ public class LocalTransformation {
     }
 
     private byte rotateHangingEntity(String type, byte face) {
-        if(type.equals("minecraft:painting")) {
+        if(EntityTypeUtil.isPainting(type)) {
             if(face >=0) {
                 return (byte) ((face+rotations)%4);
             }
-        } else if(type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
+        } else if(EntityTypeUtil.isItemFrame(type)) {
             if(face > 1) {
                 byte[] order = new byte[]{5,3,4,2};
                 for(int i=0; i< order.length;i++) {
@@ -208,7 +212,7 @@ public class LocalTransformation {
     }
     
     public Byte transformItemRotation(Byte facing, Byte itemRot) {
-        return flipItemRotation(rotateHangingEntity("minecraft:item_frame",facing), rotateItemRotation(facing,itemRot));
+        return flipItemRotation(rotateHangingEntity(EntityTypeUtil.ITEM_FRAME,facing), rotateItemRotation(facing,itemRot));
     }
     
     private Byte rotateItemRotation(Byte facing, Byte itemRot) {
