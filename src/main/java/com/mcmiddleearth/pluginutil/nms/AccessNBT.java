@@ -1,9 +1,13 @@
 package com.mcmiddleearth.pluginutil.nms;
 
 import com.mcmiddleearth.pluginutil.NumericUtil;
+import com.mcmiddleearth.pluginutil.PluginUtilsPlugin;
+import com.mcmiddleearth.pluginutil.developer.Debugable;
+import com.mcmiddleearth.pluginutil.developer.DevUtil;
 import net.minecraft.nbt.*;
 
 import java.io.*;
+import java.util.logging.Logger;
 
 public class AccessNBT {
     public static void writeNBTToStream(Object nbt, DataOutput out) throws ClassNotFoundException, IOException {
@@ -16,7 +20,13 @@ public class AccessNBT {
     }
 
     public static Object readNBTFromStream(DataInput in) throws ClassNotFoundException, IOException {
-        return NbtIo.read(in, new NbtAccounter(10000,100));
+        try {
+            return NbtIo.read(in, new NbtAccounter(100000, 100));
+        } catch (ReportedNbtException | NbtAccounterException ex) {
+            ((Debugable)PluginUtilsPlugin.getInstance()).getDevUtil()
+                    .log(2, "Error in AccessNBT.readNBTFromStream "+ex.getMessage());
+            return null;
+        }
         /*Class[] argsClasses = new Class[]{DataInput.class, NMSUtil.getNMSClass("nbt.NBTReadLimiter")};
         return NMSUtil.invokeNMS("nbt.NBTCompressedStreamTools", "a", argsClasses, null,
                 in, NMSUtil.getNMSField("nbt.NBTReadLimiter", "a", null));*/

@@ -231,8 +231,8 @@ public final class FancyMessage {
             }
             if(hoverText!=null) {
                 hoverText = replaceQuotationMarks(hoverText);
-                rawText = rawText.concat(",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":");
-                rawText = rawText.concat(JsonMessageParser.parseColoredText(hoverText)+"}");
+                rawText = rawText.concat(",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[");
+                rawText = rawText.concat(JsonMessageParser.parseColoredText(hoverText)+"]}");
             }
             rawText = rawText.concat("}");
         }

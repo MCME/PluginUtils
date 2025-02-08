@@ -413,21 +413,27 @@ public class MCMEPlotFormat implements PlotStorageFormat {
         try {
             for (int i = 0; i < tileEntityLength; i++) {
                 Object nbt = AccessNBT.readNBTFromStream(in);
-                tileEntityDatas.add(nbt);
+                if(nbt!=null) {
+                    tileEntityDatas.add(nbt);
+                }
             }
         }catch (ClassNotFoundException ex) {
             ex.printStackTrace();
         }
             for (Object nbt : tileEntityDatas) {
+                int newX, newY, newZ;
                 try {
                     Object nmsWorld = AccessCraftBukkit.getWorldServer(location.getWorld());
                     Object blockposition = AccessWorld.getTileEntityBlockPosition(nbt);
                     Object newPosition = AccessCore.shiftBlockPosition(blockposition, shift.getBlockX(), shift.getBlockY(), shift.getBlockZ());
                     final Vector rotatedVector = rotation.transformVector(AccessCore.toVector(newPosition), true);
                     newPosition = AccessCore.toBlockPosition(rotatedVector);
-                    AccessNBT.setInt(nbt, "x", AccessCore.getBlockPositionX(newPosition));
-                    AccessNBT.setInt(nbt, "y", AccessCore.getBlockPositionY(newPosition));
-                    AccessNBT.setInt(nbt, "z", AccessCore.getBlockPositionZ(newPosition));
+                    newX = (int) AccessCore.getBlockPositionX(newPosition);
+                    newY = (int) AccessCore.getBlockPositionY(newPosition);
+                    newZ = (int) AccessCore.getBlockPositionZ(newPosition);
+                    AccessNBT.setInt(nbt, "x", newX);
+                    AccessNBT.setInt(nbt, "y", newY);
+                    AccessNBT.setInt(nbt, "z", newZ);
 
                     Object chunk = AccessWorld.getChunkAtWorldCoords(nmsWorld, newPosition);
                     //IBlockState a_(BlockPosition)
@@ -439,7 +445,8 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                         //void a(TileEntity)
                         AccessWorld.setTileEntity(chunk, entity);
                     } else {
-                        Logger.getLogger(MCMEPlotFormat.class.getSimpleName()).info("Warning! Tile entity skipped!");
+                        Logger.getLogger(MCMEPlotFormat.class.getSimpleName()).info("Warning! Tile entity skipped! "
+                                + newX + " "+ newY+ " "+newZ);
                     }
                 } catch (ClassNotFoundException | SecurityException | IllegalArgumentException | NullPointerException ex) {
                     Logger.getLogger(MCMEPlotFormat.class.getName()).log(Level.SEVERE, null, ex);
