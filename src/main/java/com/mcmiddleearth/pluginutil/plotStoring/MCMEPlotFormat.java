@@ -6,10 +6,7 @@
 package com.mcmiddleearth.pluginutil.plotStoring;
 
 import com.mcmiddleearth.pluginutil.nms.*;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
@@ -127,7 +124,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             }
             out.writeInt(biomePalette.size()); //write length of palette
             for(int i=0; i<biomePalette.size();i++) {
-                String biomeDataString = biomePalette.get(i).name();
+                String biomeDataString = biomePalette.get(i).getKey().getKey();
                 byte[] biomeDataBytes = biomeDataString.getBytes(StandardCharsets.UTF_8);
                 out.writeInt(biomeDataBytes.length); //write length of next blockdata
                 out.write(biomeDataBytes);
@@ -159,7 +156,9 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             for(Entity entity: entities) {
                 Object nbt = AccessNBT.createNBTCompound();
                 Object nmsEntity = AccessCraftBukkit.getNMSEntity(entity);
-                AccessNBT.setString(nbt, "id", AccessWorld.getEntityId(nmsEntity));
+                String entityType = (String) AccessWorld.getEntityType(nmsEntity);
+//Logger.getGlobal().info("Entity Description id: "+entityType);
+                AccessNBT.setString(nbt, "id", entityType);
                 nbt = AccessWorld.writeEntityNBT(nmsEntity, nbt);
                 AccessNBT.writeNBTToStream(nbt, out);
             }
@@ -303,10 +302,11 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             in.readFully(byteData);
             String blockDataString;
             if(legacyBlocks) {
-                blockDataString = blockMappings(new String(byteData, StandardCharsets.UTF_8));
+                blockDataString = legacyBlockMappings(new String(byteData, StandardCharsets.UTF_8));
             } else {
                 blockDataString = new String(byteData, StandardCharsets.UTF_8);
             }
+            blockDataString = blockMappings(blockDataString);
             BlockData blockData = Bukkit.getServer()
                                         .createBlockData(blockDataString);
             palette.put(i, rotation.transformBlockData(blockData));
@@ -321,7 +321,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
             //Logger.getGlobal().info("Biome name: "+biomeName);
             Biome biome = Biome.PLAINS;
             try {
-                biome = Biome.valueOf(biomeName);
+                biome = Registry.BIOME.get(NamespacedKey.minecraft(biomeName.toLowerCase()));//get(Registry.BIOME.getKey())//Biome.valueOf(biomeName);
             } catch (IllegalArgumentException ignore) {}
             //Logger.getGlobal().info("Biome palette entry: "+i+" "+biome);
             biomePalette.put(i, biome);
@@ -496,7 +496,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                 String type = AccessNBT.getString(nbt, "id");
                 Byte facing = 0;
 //Logger.getGlobal().info("id: "+type);
-                if (type.equals("minecraft:painting") || type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame")) {
+                if (EntityTypeUtil.isHanging(type)) {
 //Logger.getGlobal().log(Level.INFO, "NBT: "+nbt.toString());
                     //byte f(String)
                     boolean lowercaseFacing;
@@ -517,7 +517,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                     } else {
                         AccessNBT.setNBTBase(nbt, "Facing", nbtFacing);
                     }
-                    if (type.equals("minecraft:item_frame") || type.equals("minecraft:glow_item_frame") /*&& transformedFacing < 2*/) {
+                    if (EntityTypeUtil.isItemFrame(type) /*&& transformedFacing < 2*/) {
 //Logger.getGlobal().info("item rotation");
                         //byte f(String)
                         Byte itemRot = AccessNBT.getByte(nbt, "ItemRotation");
@@ -542,7 +542,7 @@ public class MCMEPlotFormat implements PlotStorageFormat {
                 //NBTBaste a(String, NBTBase)
                 AccessNBT.setNBTBase(nbt, "TileX", nbtTileX);
                 AccessNBT.setNBTBase(nbt, "TileY", nbtTileY);
-                AccessNBT.setNBTBase(nbt, "TileZ", nbtTileY);
+                AccessNBT.setNBTBase(nbt, "TileZ", nbtTileZ);
 
                 //give random UUID to entity
                 UUID uuid = UUID.randomUUID();
@@ -561,9 +561,10 @@ public class MCMEPlotFormat implements PlotStorageFormat {
 
                 //WorldServer getHandle()
                 Object nmsWorld = AccessCraftBukkit.getWorldServer(location.getWorld());
+//Logger.getGlobal().info("NBT: "+nbt);
                 Object entity = AccessWorld.createEntity(nmsWorld, nbt);
+//Logger.getGlobal().info("ENTITY: "+entity);
 
-//Logger.getGlobal().info("ENTITY: "+entity.getClass().getCanonicalName());
                 //add entity to world
                 AccessServer.addFreshEntity(nmsWorld, entity);
             } catch (ClassNotFoundException ex) {
@@ -589,13 +590,20 @@ public class MCMEPlotFormat implements PlotStorageFormat {
         Logger.getGlobal().info(name+" "+loc.getBlockX()+" "+loc.getBlockY()+" "+loc.getBlockZ());
     }
 
-    private String blockMappings(String blockData) {
+    private String legacyBlockMappings(String blockData) {
         if(blockData.contains("level")) {
             if(blockData.contains("level=0")) {
                 blockData = blockData.replace("[level=0]","");
             } else {
                 blockData = blockData.replace("cauldron", "water_cauldron");
             }
+        }
+        return blockData;
+    }
+
+    private String blockMappings(String blockData) {
+        if(blockData.equals("minecraft:grass")) {
+            return "minecraft:short_grass";
         }
         return blockData;
     }

@@ -42,17 +42,20 @@ public class ConfigurationUtil {
     }
     
     public static Location deserializeLocation(Map<String,Object> data) {
-        World world = Bukkit.getWorld((String) data.get("world"));
-        if(world == null) {
-            return null;
+        String worldName = (String) data.get("world");
+        if(worldName != null) {
+            World world = Bukkit.getWorld(worldName);
+            if (world == null) {
+                return null;
+            } else {
+                return new Location(world, getDouble(data, "x"),
+                        getDouble(data, "y"),
+                        getDouble(data, "z"),
+                        getFloat(data, "yaw"),
+                        getFloat(data, "pitch"));
+            }
         }
-        else {
-            return new Location(world, getDouble(data,"x"), 
-                                       getDouble(data,"y"),
-                                       getDouble(data,"z"),
-                                       getFloat(data,"yaw"),
-                                       getFloat(data,"pitch"));
-        }
+        return null;
     }
     
     public static Map<String,Object> serializeEulerAngle(EulerAngle angle) {
