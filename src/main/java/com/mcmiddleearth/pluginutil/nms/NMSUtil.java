@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.mcmiddleearth.pluginutil;
+package com.mcmiddleearth.pluginutil.nms;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -37,17 +37,17 @@ import java.util.logging.Logger;
  */
 public class NMSUtil {
 
-    public static Class<?> getNMSClass(String name) throws ClassNotFoundException {
+    static Class<?> getNMSClass(String name) throws ClassNotFoundException {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         return Class.forName("net.minecraft." + name);
     }
 
-    public static Class<?> getCraftBukkitClass(String name) throws ClassNotFoundException {
+    static Class<?> getCraftBukkitClass(String name) throws ClassNotFoundException {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         return Class.forName("org.bukkit.craftbukkit." + version + "." + name);
     }
 
-    public static void sendPacket(Player player, Object packet) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException, ClassNotFoundException {
+    static void sendPacket(Player player, Object packet) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException, ClassNotFoundException {
         Object handle = player.getClass().getMethod("getHandle").invoke(player);
         Object playerConnection = handle.getClass().getField("b").get(handle);
         playerConnection.getClass().getMethod("a"/*"sendPacket"*/, getNMSClass("network.protocol.Packet")).invoke(playerConnection, packet);
@@ -102,7 +102,7 @@ public class NMSUtil {
         }
     }*/
     
-    public static Object invokeCraftBukkit(String className, String methodName, Class[] argsClasses, 
+    static Object invokeCraftBukkit(String className, String methodName, Class[] argsClasses,
                                            Object object, Object... args) {
         try {
             Class clazz = getCraftBukkitClass(className);
@@ -113,7 +113,7 @@ public class NMSUtil {
         }
     }
     
-    public static Object invokeNMS(String className, String methodName, Class[] argsClasses, 
+    static Object invokeNMS(String className, String methodName, Class[] argsClasses,
                                    Object object, Object... args) {
         try {
             Class clazz = getNMSClass(className);
@@ -124,7 +124,7 @@ public class NMSUtil {
         return null;
     }
     
-    public static Object invoke(Class<?> clazz, String methodName, Class[] argsClasses, 
+    static Object invoke(Class<?> clazz, String methodName, Class[] argsClasses,
                                 Object object, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
         if(argsClasses==null) {
             argsClasses = new Class[args.length];
@@ -141,7 +141,7 @@ public class NMSUtil {
         return method.invoke(object, args);
     }
     
-    public static Object createNMSObject(String className,Class[] argsClasses,Object... args) {
+    static Object createNMSObject(String className,Class[] argsClasses,Object... args) {
         try {
             Class clazz = getNMSClass(className);
             if(argsClasses==null) {
@@ -158,7 +158,7 @@ public class NMSUtil {
         return null;
     }
     
-    public static Object getNMSField(String className, String fieldName, Object object) {
+    static Object getNMSField(String className, String fieldName, Object object) {
         try {
             Class clazz = getNMSClass(className);
             Field field = clazz.getField(fieldName);
@@ -170,7 +170,7 @@ public class NMSUtil {
         return null;
     }
     
-    public static Object getCraftBukkitField(String className, String fieldName, Object object) {
+    static Object getCraftBukkitField(String className, String fieldName, Object object) {
         try {
             Class clazz = getCraftBukkitClass(className);
             Field field = clazz.getField(fieldName);
@@ -182,7 +182,7 @@ public class NMSUtil {
         return null;
     }
     
-    public static Object getCraftBukkitDeclaredField(String className, String fieldName, Object object) {
+    static Object getCraftBukkitDeclaredField(String className, String fieldName, Object object) {
         try {
             Class clazz = getCraftBukkitClass(className);
 //for(Field field : clazz.getDeclaredFields()) {
@@ -198,21 +198,7 @@ public class NMSUtil {
         return null;
     }
     
-    public static Vector toVector(Object blockPosition) {
-        return new Vector((int) invokeNMS("core.BaseBlockPosition","u"/*"getX"*/,null,blockPosition),
-                          (int) invokeNMS("core.BaseBlockPosition","v"/*"getY"*/,null,blockPosition),
-                          (int) invokeNMS("core.BaseBlockPosition","w"/*getZ"*/,null,blockPosition));
-    }                       
-    
-    public static Object toBlockPosition(Vector vector) {
-        return createNMSObject("core.BlockPosition",
-                               new Class[]{int.class,int.class,int.class},
-                               vector.getBlockX(),
-                               vector.getBlockY(),
-                               vector.getBlockZ());
-    }
-    
-    public static void calcLight(Location loc) {
+    static void calcLight(Location loc) {
         Object nmsChunkStatus = NMSUtil.getNMSField("world.level.chunk.ChunkStatus", "l", null);
         Object blockPosition = NMSUtil.createNMSObject("core.BlockPosition", new Class[]{int.class,int.class,int.class},
                                                        loc.getBlockX(),loc.getBlockY(), loc.getBlockZ());
@@ -230,7 +216,7 @@ public class NMSUtil {
         NMSUtil.invokeNMS("world.level.lighting.LightEngine", "a", new Class[]{blockPosition.getClass()}, lightEngine, blockPosition);
     }
     
-    public static void calcLight(Chunk chunk, List<Vector> positions) {
+    static void calcLight(Chunk chunk, List<Vector> positions) {
         Object nmsChunkStatus = NMSUtil.getNMSField("world.level.chunk.ChunkStatus", "l", null);
         Object nmsChunk = NMSUtil.invokeCraftBukkit("CraftChunk", "getHandle", new Class[]{nmsChunkStatus.getClass()}, chunk, nmsChunkStatus);
 //Logger.getGlobal().info("nmsChunk"+nmsChunk);
@@ -249,7 +235,7 @@ public class NMSUtil {
         });
     }
 
-    public static Object getTileEntity(Block block) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
+    static Object getTileEntity(Block block) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, InstantiationException {
         Object nmsWorld = block.getWorld().getClass().getMethod("getHandle")
                 .invoke(block.getWorld());
         Object blockPosition = NMSUtil.getNMSClass("core.BlockPosition").getConstructor(int.class,int.class,int.class)
