@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 /**
  * Utility class to handle sending of fancy messages.
@@ -164,6 +165,7 @@ public class MessageUtil {
         } catch(Error | Exception ex ) {
             //Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, null, ex);
             //Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Error in PluginUtils plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/tellraw ...' instead of directly sending message packets.");
+            //Logger.getGlobal().info(message);
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName()+ " " + message);
         }
     }
