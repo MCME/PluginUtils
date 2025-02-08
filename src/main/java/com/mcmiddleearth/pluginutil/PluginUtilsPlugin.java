@@ -5,7 +5,9 @@
  */
 package com.mcmiddleearth.pluginutil;
 
+import com.mcmiddleearth.pluginutil.developer.Debugable;
 import com.mcmiddleearth.pluginutil.developer.DevCommand;
+import com.mcmiddleearth.pluginutil.developer.DevUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
@@ -13,7 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author Eriol_Eandur
  */
-public class PluginUtilsPlugin extends JavaPlugin {
+public class PluginUtilsPlugin extends JavaPlugin implements Debugable {
         
     private static JavaPlugin instance;
 
@@ -21,9 +23,16 @@ public class PluginUtilsPlugin extends JavaPlugin {
         return instance;
     }
 
+    public final DevUtil devUtil = new DevUtil();
+
     @Override
     public void onEnable() {
         getCommand("dev").setExecutor(new DevCommand());
         instance = this;
+    }
+
+    @Override
+    public DevUtil getDevUtil() {
+        return devUtil;
     }
 }
