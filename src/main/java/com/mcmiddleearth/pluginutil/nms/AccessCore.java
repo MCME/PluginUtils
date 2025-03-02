@@ -37,12 +37,12 @@ public class AccessCore {
     }
 
     public static Object getBlockPositionY(Object blockPosition) {
-        return ((BlockPos)blockPosition).getX();
+        return ((BlockPos)blockPosition).getY();
         //return NMSUtil.invokeNMS("core.BaseBlockPosition", "v"/*"getY"*/, null, blockPosition);//
     }
 
     public static Object getBlockPositionZ(Object blockPosition) {
-        return ((BlockPos)blockPosition).getX();
+        return ((BlockPos)blockPosition).getZ();
         //return NMSUtil.invokeNMS("core.BaseBlockPosition", "w"/*"getZ"*/, null, blockPosition);//
     }
 }
