@@ -132,8 +132,7 @@ public class NBTTagBuilder {
     }
     
     public short getShort(String key) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        return tag.getShort(key);
-        //return (short) tag.getClass().getMethod("g"/*getShort*/, String.class).invoke(tag, key);
+        return tag.getShortOr(key, (short) 0);
     }
     
     @Override

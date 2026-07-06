@@ -65,7 +65,7 @@ public class AccessNBT {
     }
 
     public static Object getCompound(Object tag, String key) throws ClassNotFoundException {
-        return ((CompoundTag)tag).getCompound(key);
+        return ((CompoundTag)tag).getCompoundOrEmpty(key);
         /*if(NMSUtil.getNMSClass("nbt.NBTTagCompound").isInstance(tag)) {
             Object result =  NMSUtil.invokeNMS("nbt.NBTTagCompound","p"/*getCompound*,
                     new Class[]{String.class},tag,key);
@@ -85,34 +85,34 @@ public class AccessNBT {
     }*/
 
     public static Object getNBTBaseList(Object nbt, String key) {
-        return ((CompoundTag)nbt).getList(key, 6);
+        return ((CompoundTag)nbt).getListOrEmpty(key);
         /*return NMSUtil.invokeNMS("nbt.NBTTagCompound", "c"/*"getList"*,
                 new Class[]{String.class, int.class},
                 nbt, key, 6); // 6 = content type double > NBTBase*/
     }
 
     public static Object getFloatList(Object nbt, String key) {
-        return ((CompoundTag)nbt).getList(key, 5);
+        return ((CompoundTag)nbt).getListOrEmpty(key);
         /*return NMSUtil.invokeNMS("nbt.NBTTagCompound", "c"/*"getList"*,
                 new Class[]{String.class, int.class},
                 nbt, key, 5); // 5= content type float > NBTBase;*/
     }
 
     public static float getFloatFromList(Object list, int index) {
-        return ((ListTag)list).getFloat(index);
+        return ((ListTag)list).getFloatOr(index, 0f);
         /*return (float) NMSUtil.invokeNMS("nbt.NBTTagList", "i",
                 new Class[]{int.class}, list, index);*/
     }
 
     public static double getDoubleFromList(Object list, int index) {
-        return ((ListTag)list).getDouble(index);
+        return ((ListTag)list).getDoubleOr(index, 0d);
         /*Class[] argsClassesC = new Class[]{int.class};
         return (double) NMSUtil.invokeNMS("nbt.NBTTagList", "h",
                 argsClassesC, list, index);*/
     }
 
     public static Integer getInt(Object tag, String key) throws ClassNotFoundException {
-        return ((CompoundTag)tag).getInt(key);
+        return ((CompoundTag)tag).getIntOr(key, 0);
         /*if(NMSUtil.getNMSClass("nbt.NBTTagCompound").isInstance(tag)) {
             Object result =  NMSUtil.invokeNMS("nbt.NBTTagCompound","h"/*getInt*,
                     new Class[]{String.class},tag,key);
@@ -122,7 +122,7 @@ public class AccessNBT {
     }
 
     public static Short getShort(Object tag, String key) throws ClassNotFoundException {
-        return ((CompoundTag)tag).getShort(key);
+        return ((CompoundTag)tag).getShortOr(key, (short) 0);
         /*if(NMSUtil.getNMSClass("nbt.NBTTagCompound").isInstance(tag)) {
             Object result =  NMSUtil.invokeNMS("nbt.NBTTagCompound","g"/*getShort*,
                     new Class[]{String.class},tag,key);
@@ -132,7 +132,7 @@ public class AccessNBT {
     }
 
     public static Long getLong(Object tag, String key) throws ClassNotFoundException {
-        return ((CompoundTag)tag).getLong(key);
+        return ((CompoundTag)tag).getLongOr(key, 0L);
         /*if(NMSUtil.getNMSClass("nbt.NBTTagCompound").isInstance(tag)) {
             Object result =  NMSUtil.invokeNMS("nbt.NBTTagCompound","i"/*getLong*,
                     new Class[]{String.class},tag,key);
@@ -142,7 +142,7 @@ public class AccessNBT {
     }
 
     public static Byte getByte(Object tag, String key) throws ClassNotFoundException {
-        return ((CompoundTag)tag).getByte(key);
+        return ((CompoundTag)tag).getByteOr(key, (byte) 0);
         /*if(NMSUtil.getNMSClass("nbt.NBTTagCompound").isInstance(tag)) {
             Object result = NMSUtil.invokeNMS("nbt.NBTTagCompound", "f"/*getByte*,
                     new Class[]{String.class}, tag, key);
@@ -152,7 +152,7 @@ public class AccessNBT {
     }
 
     public static String getString(Object tag, String key) throws ClassNotFoundException {
-        return ((CompoundTag)tag).getString(key);
+        return ((CompoundTag)tag).getStringOr(key, "");
         /*if(NMSUtil.getNMSClass("nbt.NBTTagCompound").isInstance(tag)) {
             Object result =  NMSUtil.invokeNMS("nbt.NBTTagCompound","l"/*getString*,
                     new Class[]{String.class},tag,key);
@@ -162,7 +162,7 @@ public class AccessNBT {
     }
 
     public static Float getFloat(Object tag, String key) throws ClassNotFoundException {
-        return ((CompoundTag)tag).getFloat(key);
+        return ((CompoundTag)tag).getFloatOr(key, 0f);
         /*if(NMSUtil.getNMSClass("nbt.NBTTagCompound").isInstance(tag)) {
             Object result =  NMSUtil.invokeNMS("nbt.NBTTagCompound","j"/*getFloat*,
                     new Class[]{String.class},tag,key);
@@ -172,7 +172,7 @@ public class AccessNBT {
     }
 
     public static Double getDouble(Object tag, String key) throws ClassNotFoundException {
-        return ((CompoundTag)tag).getDouble(key);
+        return ((CompoundTag)tag).getDoubleOr(key, 0d);
         /*if(NMSUtil.getNMSClass("nbt.NBTTagCompound").isInstance(tag)) {
             Object result =  NMSUtil.invokeNMS("nbt.NBTTagCompound","k"/*getDouble*,
                     new Class[]{String.class},tag,key);
