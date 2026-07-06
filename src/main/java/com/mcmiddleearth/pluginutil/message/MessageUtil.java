@@ -19,7 +19,6 @@ package com.mcmiddleearth.pluginutil.message;
 import com.mcmiddleearth.pluginutil.FileUtil;
 import com.mcmiddleearth.pluginutil.NumericUtil;
 import com.mcmiddleearth.pluginutil.PluginUtilsPlugin;
-import com.mcmiddleearth.pluginutil.nms.NMSUtil;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

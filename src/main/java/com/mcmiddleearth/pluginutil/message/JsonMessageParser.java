@@ -24,8 +24,9 @@ public class JsonMessageParser {
 
                 JsonObject click = new JsonObject();
                 part.add("clickEvent",click);
-                    click.addProperty("action", (data[1].startsWith("http")?"open_url":
-                                                                 (message.isRunDirect()?"run_command":"suggest_command")));
+                    click.addProperty("action", (message.isCopyToClipboard()?"copy_to_clipboard":
+                                                 (data[1].startsWith("http")?"open_url":
+                                                                 (message.isRunDirect()?"run_command":"suggest_command"))));
                     click.addProperty("value",data[1]);
         }
         return result;

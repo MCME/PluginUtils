@@ -24,7 +24,9 @@ public final class FancyMessage {
     private final List<String[]> data = new ArrayList<>();
 
     private boolean runDirect = false;
-    
+
+    private boolean copyToClipboard = false;
+
     private ChatColor baseColor;
     
     private MessageUtil messageUtil;
@@ -193,6 +195,16 @@ public final class FancyMessage {
     }
 
     /**
+     * Clicking at the message will copy the associated text to the player's clipboard
+     * instead of running or suggesting a command.
+     * @return same message
+     */
+    public FancyMessage setCopyToClipboard() {
+        this.copyToClipboard = true;
+        return this;
+    }
+
+    /**
      * Send a fancy message to a player.
      * @param recipient Player who will get the message.
      * @return same message
@@ -200,7 +212,9 @@ public final class FancyMessage {
     public FancyMessage send(Player recipient) {
         String rawText = "[";
         String action;
-        if(runDirect) {
+        if(copyToClipboard) {
+            action = "copy_to_clipboard";
+        } else if(runDirect) {
             action = "run_command";
         } else {
             action = "suggest_command";
@@ -222,7 +236,7 @@ public final class FancyMessage {
             rawText = rawText.concat("{\"text\":\""+message+"\",\"color\":\""+color+"\""+format);
             if(command!=null) {
                 String thisAction = action;
-                if(command.startsWith("http")) {
+                if(!copyToClipboard && command.startsWith("http")) {
                     thisAction = "open_url";
                 }
                 command = replaceQuotationMarks(command);
@@ -313,6 +327,10 @@ public final class FancyMessage {
 
     public boolean isRunDirect() {
         return runDirect;
+    }
+
+    public boolean isCopyToClipboard() {
+        return copyToClipboard;
     }
 
     public JsonObject parseJson() {
