@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'io.papermc.paperweight.userdev' version '2.0.0-SNAPSHOT'
+}
+
+group = 'com.mcmiddleearth'
+version = '2.0.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url = uri('https://repo.papermc.io/repository/maven-public/') }
+    maven { url = uri('https://libraries.minecraft.net') }
+    maven { url = uri('https://maven.enginehub.org/repo/') }
+    maven { url = uri('https://repo.mikeprimm.com') }
+}
+
+dependencies {
+    // Provides paper-api + the CraftBukkit/NMS classes from PaperMC's published dev-bundle.
+    // Replaces the old hard-coded <systemPath> craftbukkit jar — nothing local required.
+    paperweight.paperDevBundle('26.1.2.build.72-stable')
+
+    compileOnly 'com.google.guava:guava:33.3.1-jre'
+    compileOnly 'com.sk89q.worldedit:worldedit-core:7.3.0'
+    compileOnly 'com.sk89q.worldedit:worldedit-bukkit:7.3.0'
+    // '@jar' forces the main artifact and ignores dynmap's Gradle module metadata, which otherwise
+    // selects an 'unshaded' variant that is missing the org.dynmap.* API classes.
+    compileOnly 'us.dynmap:dynmap-api:3.3-beta-5@jar'
+    compileOnly 'com.mojang:authlib:3.13.56'
+    compileOnly 'org.bstats:bstats-bukkit:3.1.0'
+    compileOnly 'com.googlecode.json-simple:json-simple:1.1.1'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}

@@ -1,0 +1,7 @@
+# Lets consumers resolve this repo directly as com.github.MCME:PluginUtils:<tag>.
+# Needs JDK 25 (paperweight-userdev + Paper 26.x); JitPack provisions it via sdkman.
+before_install:
+  - sdk install java 25.0.2-tem
+  - sdk use java 25.0.2-tem
+install:
+  - ./gradlew publishToMavenLocal -x test --no-daemon
