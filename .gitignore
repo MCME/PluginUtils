@@ -12,3 +12,5 @@ AUDIT_LOG.md
 AUDIT-REMEDIATION-PLAN.md
 Audit-*.html
 BRAINSTORM-*.md
+.gradle/
+build/
