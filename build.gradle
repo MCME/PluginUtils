@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.mcmiddleearth'
-version = '2.0.2-SNAPSHOT'
+version = '2.0.2'
 
 repositories {
     mavenCentral()
@@ -18,7 +18,7 @@ repositories {
 dependencies {
     // Provides paper-api + the CraftBukkit/NMS classes from PaperMC's published dev-bundle.
     // Replaces the old hard-coded <systemPath> craftbukkit jar — nothing local required.
-    paperweight.paperDevBundle('26.1.2.build.72-stable')
+    paperweight.paperDevBundle('26.2.build.111-stable')
 
     compileOnly 'com.google.guava:guava:33.3.1-jre'
     compileOnly 'com.sk89q.worldedit:worldedit-core:7.3.0'

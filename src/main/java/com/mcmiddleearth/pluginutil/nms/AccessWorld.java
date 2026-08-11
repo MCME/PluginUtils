@@ -12,14 +12,20 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftServer;
 
 public class AccessWorld {
 
     public static Object createEntity(Object nmsWorld, Object nbt) throws ClassNotFoundException {
-        return EntityType.loadEntityRecursive((CompoundTag) nbt, (ServerLevel) nmsWorld, EntitySpawnReason.LOAD, EntityProcessor.NOP);
+        // EntityType.loadEntityRecursive no longer takes a CompoundTag; wrap it in a ValueInput
+        // (the read counterpart of the TagValueOutput used in writeEntityNBT).
+        HolderLookup.Provider provider = ((CraftServer) Bukkit.getServer()).getServer().registries().compositeAccess();
+        ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, provider, (CompoundTag) nbt);
+        return EntityType.loadEntityRecursive(input, (ServerLevel) nmsWorld, EntitySpawnReason.LOAD, EntityProcessor.NOP);
     }
 
     public static Object getEntityType(Object nmsEntity) {
