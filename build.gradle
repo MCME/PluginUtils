@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.mcmiddleearth'
-version = '2.0.1-SNAPSHOT'
+version = '2.0.1'
 
 repositories {
     mavenCentral()
@@ -36,6 +36,17 @@ java {
         languageVersion = JavaLanguageVersion.of(25)
     }
     withSourcesJar()
+}
+
+// The plugin.yml still uses Maven-style ${project.artifactId}/${project.version} tokens; substitute
+// them at build time (Gradle does not do Maven resource filtering) so Paper gets a valid name.
+processResources {
+    def pluginVersion = version.toString()
+    filesMatching('plugin.yml') {
+        filter { line ->
+            line.replace('${project.artifactId}', 'PluginUtils').replace('${project.version}', pluginVersion)
+        }
+    }
 }
 
 publishing {
