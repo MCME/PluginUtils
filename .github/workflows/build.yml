@@ -3,7 +3,12 @@ name: build
 on:
   push:
     branches: [pluginutils-26.2, master, development]
+    # This project tags releases bare (2.0.0, 2.0.1, 2.0.2); v1.2 is an older style.
+    tags: ['[0-9]*', 'v[0-9]*']
   pull_request:
+  # Publishing is a deliberate act, so it is reachable from the Actions tab
+  # ("Run workflow") rather than riding along with every push.
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,3 +29,13 @@ jobs:
       # published dev-bundle, so this needs nothing local — it builds on any runner.
       - name: Build
         run: ./gradlew build --no-daemon --stacktrace
+
+      # Publishes com.mcmiddleearth:PluginUtils to repo.mcmiddleearth.com - snapshots or
+      # releases is chosen by the version suffix in build.gradle. Deliberately NOT run on
+      # ordinary pushes: trigger it manually, or by pushing a v* tag.
+      - name: Publish to repo.mcmiddleearth.com
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+        run: ./gradlew publish --no-daemon --stacktrace
+        env:
+          MCME_MAVEN_NAME: ${{ secrets.MCME_MAVEN_NAME }}
+          MCME_MAVEN_SECRET: ${{ secrets.MCME_MAVEN_SECRET }}

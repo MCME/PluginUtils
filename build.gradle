@@ -55,4 +55,30 @@ publishing {
             from components.java
         }
     }
+    // Publish to MCME's own Reposilite, so consumers resolve this as
+    // com.mcmiddleearth:PluginUtils - the same coordinates the 1.9.x line already uses there,
+    // and the same groupId this build declares above.
+    //
+    // Without a publish target the only distribution channel was JitPack, and JitPack derives
+    // the groupId from the GitHub org rather than from `group` above: consumers got
+    // com.github.MCME:PluginUtils instead. Maven treats a differing groupId as an unrelated
+    // artifact, so a project depending on both this and something that still pulls
+    // com.mcmiddleearth:PluginUtils ended up with two copies on the classpath and no version
+    // conflict resolution between them. Publishing here keeps one coordinate for one library.
+    //
+    // Credentials come from the MCME_MAVEN_NAME / MCME_MAVEN_SECRET org secrets in CI, or the
+    // same-named environment variables locally. Absent those, `publish` fails and every other
+    // task (build, test, publishToMavenLocal) is unaffected.
+    repositories {
+        maven {
+            name = 'mcme'
+            url = uri(version.toString().endsWith('SNAPSHOT')
+                    ? 'https://repo.mcmiddleearth.com/snapshots'
+                    : 'https://repo.mcmiddleearth.com/releases')
+            credentials {
+                username = System.getenv('MCME_MAVEN_NAME')
+                password = System.getenv('MCME_MAVEN_SECRET')
+            }
+        }
+    }
 }
