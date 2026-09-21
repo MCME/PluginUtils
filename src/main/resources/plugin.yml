@@ -3,16 +3,16 @@ main: com.mcmiddleearth.pluginutil.PluginUtilsPlugin
 version: ${project.version}
 author: Eriol_Eandur
 load: STARTUP
-softdepend: [ProtocolLib,Essentials,WorldEdit,Dynmap]
+softdepend: [ProtocolLib,Essentials,WorldEdit,dynmap]
 api-version: 1.21
-mappings-version: mojang
+# Paper reads the mappings namespace from the jar manifest, not from plugin.yml.
 
 commands:
     dev:
         description: manage debub output
         usage: /dev [true | false | r]
     
-permission:
+permissions:
     pluginutil.developer:
-        description: Gives access to all plotbuild commands
+        description: Allows use of /dev to toggle plugin debug output
         default: op
