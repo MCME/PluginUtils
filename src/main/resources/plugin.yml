@@ -9,8 +9,8 @@ api-version: 1.21
 
 commands:
     dev:
-        description: manage debub output
-        usage: /dev [true | false | r]
+        description: Send a plugin's debug output to you in chat, or to the console
+        usage: /dev <plugin> [true | false | <level> | r]
     
 permissions:
     pluginutil.developer:
