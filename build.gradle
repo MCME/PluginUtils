@@ -1,5 +1,6 @@
 plugins {
-    id 'java'
+    // java-library (not plain java) for the `api` configuration json-simple needs below.
+    id 'java-library'
     id 'maven-publish'
     id 'io.papermc.paperweight.userdev' version '2.0.0-SNAPSHOT'
 }
@@ -28,7 +29,18 @@ dependencies {
     compileOnly 'us.dynmap:dynmap-api:3.3-beta-5@jar'
     compileOnly 'com.mojang:authlib:3.13.56'
     compileOnly 'org.bstats:bstats-bukkit:3.1.0'
-    compileOnly 'com.googlecode.json-simple:json-simple:1.1.1'
+
+    // Declared as api, not compileOnly, so it reaches the published POM and Gradle module:
+    // JSONUtil takes and returns JSONObject, and MessageUtil cannot be linked without it, so a
+    // consumer testing with MockBukkit hit NoClassDefFoundError: org/json/simple/parser/ParseException.
+    // The server ships json-simple 1.1.1 and this build does not shade, so it is never bundled; and
+    // consumers declare PluginUtils provided/compileOnly, which keeps it out of their jars too.
+    // Not `provided` in the POM: Maven drops a dependency's provided dependencies, so no consumer
+    // would ever see it.
+    api('com.googlecode.json-simple:json-simple:1.1.1') {
+        // json-simple 1.1.1's own POM wrongly declares junit 4.10 at compile scope.
+        exclude group: 'junit', module: 'junit'
+    }
 }
 
 java {
