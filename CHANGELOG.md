@@ -5,6 +5,14 @@ paperweight-userdev). The format follows [Keep a Changelog](https://keepachangel
 Releases are tagged bare (`2.0.4`, not `v2.0.4`), and pushing a tag publishes that version to
 repo.mcmiddleearth.com.
 
+## [Unreleased]
+
+### Fixed
+
+- A jar built locally right after a version bump could carry the previous version in its
+  `plugin.yml`: `processResources` did not treat the version as an input, so Gradle skipped it as
+  up to date. Published jars were never affected; CI and JitPack build from a clean checkout.
+
 ## [2.0.4] - 2026-09-23
 
 No Java source changes since 2.0.3.
@@ -59,6 +67,7 @@ No Java changes: the compiled classes are byte-identical to 2.0.2.
 First portable release: Gradle + paperweight-userdev instead of a local server jar, Paper 26.1.2,
 JDK 25. It does not load; use 2.0.1 or later.
 
+[Unreleased]: https://github.com/MCME/PluginUtils/compare/2.0.4...pluginutils-26.2
 [2.0.4]: https://github.com/MCME/PluginUtils/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/MCME/PluginUtils/compare/2.0.2...2.0.3
 [2.0.2]: https://github.com/MCME/PluginUtils/compare/2.0.1...2.0.2

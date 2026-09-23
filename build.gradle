@@ -54,6 +54,9 @@ java {
 // them at build time (Gradle does not do Maven resource filtering) so Paper gets a valid name.
 processResources {
     def pluginVersion = version.toString()
+    // Gradle cannot see a value captured by the filter closure below, so declare it: otherwise a version
+    // bump leaves this task UP-TO-DATE and the jar ships the previous version's plugin.yml.
+    inputs.property('version', pluginVersion)
     filesMatching('plugin.yml') {
         filter { line ->
             line.replace('${project.artifactId}', 'PluginUtils').replace('${project.version}', pluginVersion)
