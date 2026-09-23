@@ -20,7 +20,8 @@ plugin, and other MCME plugins compile against it and declare it as a dependency
 ## Requirements
 
 - **JDK 25** to build.
-- Runtime: **Paper 26.1.2+**, with the PluginUtils plugin installed on the server.
+- Runtime: **Paper 26.2**, with the PluginUtils plugin installed on the server. The NMS helpers are
+  tied to the Minecraft version they were compiled against; 2.0.2 and later target 26.2.
 
 ## Building
 
@@ -42,15 +43,19 @@ The plugin jar is written to `build/libs/`.
 PluginUtils is a **runtime plugin dependency** — compile against it (`compileOnly` / `provided`),
 declare it in your `plugin.yml`, and let the server provide it. Do not shade it in.
 
-Add it via [JitPack] (no credentials needed — the repo is public):
+Releases are published to MCME's Maven repository as `com.mcmiddleearth:PluginUtils`; reading it
+needs no credentials. The latest is **2.0.4**, and [CHANGELOG.md](CHANGELOG.md) lists what changed
+in each release.
 
 **Gradle**
 ```gradle
 repositories {
-    maven { url = 'https://jitpack.io' }
+    maven { url = 'https://repo.mcmiddleearth.com/releases' }
 }
 dependencies {
-    compileOnly 'com.github.MCME:PluginUtils:VERSION'
+    compileOnly 'com.mcmiddleearth:PluginUtils:2.0.4'
+    // Only if your tests load PluginUtils classes (e.g. with MockBukkit):
+    testImplementation 'com.mcmiddleearth:PluginUtils:2.0.4'
 }
 ```
 
@@ -58,15 +63,15 @@ dependencies {
 ```xml
 <repositories>
     <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
+        <id>mcme-releases</id>
+        <url>https://repo.mcmiddleearth.com/releases</url>
     </repository>
 </repositories>
 
 <dependency>
-    <groupId>com.github.MCME</groupId>
+    <groupId>com.mcmiddleearth</groupId>
     <artifactId>PluginUtils</artifactId>
-    <version>VERSION</version>
+    <version>2.0.4</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -76,19 +81,34 @@ dependencies {
 depend: [PluginUtils]
 ```
 
-Pick `VERSION`:
-- a **release tag** (recommended for anything deployed), e.g. `2.0.0`;
-- a **branch build** for testing the latest, e.g. `pluginutils-26.2-gradle-SNAPSHOT`;
-- a **commit hash** to pin exactly.
+Two things to know:
 
-The first time a given version is requested, JitPack builds it from source (the same
-paperweight build as above), then caches it.
+- **Build with JDK 25.** PluginUtils 2.0.x is compiled for Java 25. In Gradle that means a Java 25
+  toolchain: a build that targets older bytecode cannot resolve it ("only compatible with JVM
+  runtime version 25 or newer").
+- **json-simple comes along.** PluginUtils' one dependency is json-simple 1.1.1, which the Paper
+  server also ships. Since 2.0.4 it is declared in the published POM and Gradle module, so the
+  declarations above put it on your compile and test classpaths but never in your jar: tests that
+  load `MessageUtil` under MockBukkit work without adding json-simple yourself.
+
+### JitPack
+
+[JitPack] builds any tag, branch or commit on demand, as `com.github.MCME:PluginUtils:<version>`
+from the `https://jitpack.io` repository. That is handy for trying an unreleased commit, or a branch
+build such as `pluginutils-26.2-SNAPSHOT`; the first request for a version waits while JitPack
+builds it. Prefer the release coordinates above for anything you deploy: JitPack takes the groupId
+from the GitHub org, and build tools treat different groupIds as different libraries, so a build
+that also pulls in `com.mcmiddleearth:PluginUtils` (directly or through another MCME library) ends
+up with two copies on its classpath and no version resolution between them.
 
 [JitPack]: https://jitpack.io/#MCME/PluginUtils
 
 ## Branches
 
-- **`master`** — 1.9.x, Paper 1.21.x. Legacy Maven build (compiles against a local server jar; not
-  portable — use JitPack releases instead of building it yourself).
-- **`pluginutils-26.2` / `pluginutils-26.2-gradle`** — 2.0.x, Paper 26.x. Gradle + paperweight,
-  portable and CI/JitPack-buildable.
+- **`master`** — 1.9.x, Paper 1.21.x. Legacy Maven build that compiles against a local server jar,
+  so it is not portable; releases 1.9.0 to 1.9.2 are on repo.mcmiddleearth.com.
+- **`pluginutils-26.2`** — 2.0.x, Paper 26.x. Gradle + paperweight, built by CI on every push;
+  pushing a release tag publishes that version to repo.mcmiddleearth.com.
+
+The other branches are history: `development` fed 1.9.x into `master`, `1.13` dates from 2018, and
+`publish-2.0.2` is where 2.0.2 was published from, because its tag predates the publishing setup.

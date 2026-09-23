@@ -65,11 +65,11 @@ No Java changes: the compiled classes are byte-identical to 2.0.2.
 ## [2.0.0] - 2026-08-11 [YANKED]
 
 First portable release: Gradle + paperweight-userdev instead of a local server jar, Paper 26.1.2,
-JDK 25. It does not load; use 2.0.1 or later.
+JDK 25. It does not load, and its tag was withdrawn; use 2.0.1 or later.
 
 [Unreleased]: https://github.com/MCME/PluginUtils/compare/2.0.4...pluginutils-26.2
 [2.0.4]: https://github.com/MCME/PluginUtils/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/MCME/PluginUtils/compare/2.0.2...2.0.3
 [2.0.2]: https://github.com/MCME/PluginUtils/compare/2.0.1...2.0.2
-[2.0.1]: https://github.com/MCME/PluginUtils/compare/2.0.0...2.0.1
-[2.0.0]: https://github.com/MCME/PluginUtils/releases/tag/2.0.0
+[2.0.1]: https://github.com/MCME/PluginUtils/compare/f13f3bf8b693d2178f725b13eefe3ce1f7cb1112...2.0.1
+[2.0.0]: https://github.com/MCME/PluginUtils/commit/f13f3bf8b693d2178f725b13eefe3ce1f7cb1112
