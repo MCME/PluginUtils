@@ -21,7 +21,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.TitlePart;
+import net.kyori.adventure.util.Ticks;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -44,7 +47,8 @@ public class TitleUtil {
             //throw new NumberFormatException();
             sendTitle(player, fadeIn, stay, fadeOut, title, subtitle);
         } catch(Error | Exception e) {
-            Logger.getLogger(TitleUtil.class.getName()).log(Level.WARNING, "Error in Minigames plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/title ...' instead of directly sending title packets.");
+            Logger.getLogger(TitleUtil.class.getName()).log(Level.WARNING, "Could not show a title to "
+                    + player.getName() + " (" + e + "). Trying again without filling in & codes and %player%.");
             //title = ChatColor.translateAlternateColorCodes('&', title);
             //subtitle = ChatColor.translateAlternateColorCodes('&', subtitle);
             setTimes_Bukkit(player,fadeIn, stay, fadeOut);
@@ -56,15 +60,16 @@ public class TitleUtil {
     }
     
     private static void setTimes_Bukkit(Player player, int fadeIn, int stay, int fadeOut) {
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "title "+player.getName()+" times +"+fadeIn+" "+stay+" "+fadeOut);
+        player.sendTitlePart(TitlePart.TIMES,
+                Title.Times.times(Ticks.duration(fadeIn), Ticks.duration(stay), Ticks.duration(fadeOut)));
     }
     
     private static void setTitle_Bukkit(Player player, String title) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "title "+player.getName()+" title "+"{\"text\":\""+title+"\"}");
+            player.sendTitlePart(TitlePart.TITLE, Component.text(title));
     }
     
     private static void setSubtitle_Bukkit(Player player, String subtitle) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "title "+player.getName()+" subtitle "+"{\"text\":\""+subtitle+"\"}");
+            player.sendTitlePart(TitlePart.SUBTITLE, Component.text(subtitle));
     }
     
     public static void showTitleAll(List<Player> playerList, List<Player> except, String title, String subtitle) {
