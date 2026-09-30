@@ -9,6 +9,14 @@ group = 'com.mcmiddleearth'
 version = '2.0.5-SNAPSHOT'
 
 repositories {
+    // For the tests only: MockBukkit, the paper-api it runs against and their dependencies come from the local
+    // Maven repository when another project has already fetched them there, so the tests also run offline.
+    // CI finds them in the repositories below.
+    mavenLocal {
+        content {
+            onlyForConfigurations 'testCompileClasspath', 'testRuntimeClasspath'
+        }
+    }
     mavenCentral()
     maven { url = uri('https://repo.papermc.io/repository/maven-public/') }
     maven { url = uri('https://libraries.minecraft.net') }
@@ -41,6 +49,19 @@ dependencies {
         // json-simple 1.1.1's own POM wrongly declares junit 4.10 at compile scope.
         exclude group: 'junit', module: 'junit'
     }
+
+    // The tests run on MockBukkit's mock server. It needs a paper-api of the same Minecraft version (26.2) on the
+    // test classpath, and brings JUnit 6 (JUnit Jupiter) with it.
+    testImplementation 'io.papermc.paper:paper-api:26.2.build.126-stable'
+    testImplementation 'org.mockbukkit.mockbukkit:mockbukkit-v26.2:4.116.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.1.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.1.3'
+}
+
+paperweight {
+    // Only for compiling. The server jar registers its own registry and Adventure service providers, which would
+    // clash with MockBukkit's in the tests, so they get paper-api (above) instead of the server.
+    addServerDependencyTo = [configurations.compileOnly]
 }
 
 java {
@@ -62,6 +83,10 @@ processResources {
             line.replace('${project.artifactId}', 'PluginUtils').replace('${project.version}', pluginVersion)
         }
     }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 publishing {
