@@ -9,6 +9,14 @@ import com.google.gson.JsonObject;
 import com.mcmiddleearth.pluginutil.message.config.FancyMessageConfigUtil;
 import java.util.ArrayList;
 import java.util.List;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -210,48 +218,20 @@ public final class FancyMessage {
      * @return same message
      */
     public FancyMessage send(Player recipient) {
-        String rawText = "[";
-        String action;
-        if(copyToClipboard) {
-            action = "copy_to_clipboard";
-        } else if(runDirect) {
-            action = "run_command";
-        } else {
-            action = "suggest_command";
-        }
-        boolean first = true;
+        TextComponent.Builder message = null;
         for(String[] messageData: data) {
-            String message = messageData[0];
-            String command = messageData[1];
-            String hoverText = messageData[2];
-            String color = (messageData.length>3?messageData[3]:colorString(baseColor));
-            String format = (messageData.length>4?messageData[4]:"");
-            message = replaceQuotationMarks(message);
-            if(first) {
-                first = false; 
+            TextComponent part = toComponent(messageData);
+            // Like the JSON array this message used to be sent as, the first part is the parent of the others:
+            // they inherit its style wherever they set none of their own.
+            if(message == null) {
+                message = part.toBuilder();
+            } else {
+                message.append(part);
             }
-            else {
-                rawText = rawText.concat(",");
-            }
-            rawText = rawText.concat("{\"text\":\""+message+"\",\"color\":\""+color+"\""+format);
-            if(command!=null) {
-                String thisAction = action;
-                if(!copyToClipboard && command.startsWith("http")) {
-                    thisAction = "open_url";
-                }
-                command = replaceQuotationMarks(command);
-                rawText = rawText.concat(",\"clickEvent\":{\"action\":\""+thisAction+"\",\"value\":\"");
-                rawText = rawText.concat(command+"\"}");
-            }
-            if(hoverText!=null) {
-                hoverText = replaceQuotationMarks(hoverText);
-                rawText = rawText.concat(",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[");
-                rawText = rawText.concat(JsonMessageParser.parseColoredText(hoverText)+"]}");
-            }
-            rawText = rawText.concat("}");
         }
-        rawText = rawText.concat("]");
-        MessageUtil.sendRawMessage(recipient, rawText);
+        if(message != null) {
+            recipient.sendMessage(message.build());
+        }
         return this;
     }
     
@@ -263,8 +243,66 @@ public final class FancyMessage {
         FancyMessageConfigUtil.store(data, config);
     }
     
-    private String replaceQuotationMarks(String string) {
-        return string.replaceAll("\"", "__stRe__\"").replaceAll("__stRe__", "\\\\");
+    private TextComponent toComponent(String[] messageData) {
+        String command = messageData[1];
+        String hoverText = messageData[2];
+        TextComponent.Builder part = Component.text().content(messageData[0]);
+        TextColor color = textColor(messageData.length>3?messageData[3]:colorString(baseColor));
+        if(color != null) {
+            part.color(color);
+        }
+        if(messageData.length>4) {
+            addFormat(part, messageData[4]);
+        }
+        if(command!=null) {
+            part.clickEvent(clickEvent(command));
+        }
+        if(hoverText!=null) {
+            Component tooltip = GsonComponentSerializer.gson()
+                    .deserializeFromTree(JsonMessageParser.parseColoredText(hoverText));
+            part.hoverEvent(HoverEvent.showText(tooltip));
+        }
+        return part.build();
+    }
+
+    private ClickEvent<?> clickEvent(String command) {
+        if(copyToClipboard) {
+            return ClickEvent.copyToClipboard(command);
+        } else if(command.startsWith("http")) {
+            return ClickEvent.openUrl(command);
+        } else if(runDirect) {
+            return ClickEvent.runCommand(command);
+        } else {
+            return ClickEvent.suggestCommand(command);
+        }
+    }
+
+    /**
+     * A colour as addFancy stores it: a name from colorString, such as "dark_aqua", or a hex colour such as
+     * "#00ff00". Anything else, such as "reset", is no colour.
+     */
+    private static TextColor textColor(String color) {
+        if(color == null) {
+            return null;
+        }
+        return color.startsWith("#") ? TextColor.fromHexString(color) : NamedTextColor.NAMES.value(color);
+    }
+
+    /**
+     * Applies a format as addFancy stores it: JSON members such as ', "bold" : true'.
+     */
+    private static void addFormat(TextComponent.Builder part, String format) {
+        if(format == null) {
+            return;
+        }
+        for(TextDecoration decoration: TextDecoration.values()) {
+            String member = "\"" + TextDecoration.NAMES.key(decoration) + "\" : ";
+            if(format.contains(member + "true")) {
+                part.decoration(decoration, true);
+            } else if(format.contains(member + "false")) {
+                part.decoration(decoration, false);
+            }
+        }
     }
     
     public static String colorString(ChatColor color) {
