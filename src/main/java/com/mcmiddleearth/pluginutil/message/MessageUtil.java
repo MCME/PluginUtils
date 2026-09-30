@@ -19,7 +19,8 @@ package com.mcmiddleearth.pluginutil.message;
 import com.mcmiddleearth.pluginutil.FileUtil;
 import com.mcmiddleearth.pluginutil.NumericUtil;
 import com.mcmiddleearth.pluginutil.PluginUtilsPlugin;
-import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -33,11 +34,11 @@ import org.json.simple.parser.ParseException;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -152,20 +153,24 @@ public class MessageUtil {
         }
     }
 
+    /**
+     * Send a message in the JSON text format that /tellraw takes. Its click and hover events may use the field
+     * names Minecraft used before 1.21.5 (clickEvent, hoverEvent) or the current ones (click_event, hover_event).
+     * JSON that cannot be read is logged as a warning and not sent.
+     * @param sender Player who will get the message.
+     * @param message The message as JSON.
+     */
     public static void sendRawMessage(Player sender, String message) {
+        Component component;
         try {
-            /*Object chatMutableComponent = NMSUtil.getNMSClass("network.chat.IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, message);
-            Constructor<?> packetConstructor = NMSUtil.getNMSClass("network.protocol.game.ClientboundSystemChatPacket")
-                    .getConstructor(NMSUtil.getNMSClass("network.chat.IChatBaseComponent"), boolean.class);
-            Object chatPacket = packetConstructor.newInstance(chatMutableComponent, false);
-            NMSUtil.sendPacket(sender, chatPacket);
-             */
-            throw new Exception();
-        } catch(Error | Exception ex ) {
-            //Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, null, ex);
-            //Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Error in PluginUtils plugin while accessing NMS class. This plugin version was not made for your server. Please look for an update. Plugin will use Bukkit.dispatchCommand to send '/tellraw ...' instead of directly sending message packets.");
-            //Logger.getGlobal().info(message);
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName()+ " " + message);
+            component = GsonComponentSerializer.gson().deserialize(message);
+        } catch(RuntimeException ex) {
+            Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Could not send a message to "
+                    + sender.getName() + " because its JSON is not valid: " + ex.getMessage());
+            return;
+        }
+        if(component != null) {
+            sender.sendMessage(component);
         }
     }
         
