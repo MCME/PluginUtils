@@ -154,11 +154,11 @@ public class MessageUtil {
     }
 
     /**
-     * Send a message in the JSON text format that /tellraw takes. Its click and hover events may use the field
-     * names Minecraft used before 1.21.5 (clickEvent, hoverEvent) or the current ones (click_event, hover_event).
-     * JSON that cannot be read is logged as a warning and not sent.
+     * Send a message given as a JSON text component. Its click and hover events may use the field names Minecraft
+     * used before 1.21.5 (clickEvent, hoverEvent) or the current ones (click_event, hover_event). JSON that cannot be
+     * read is logged as a warning and not sent.
      * @param sender Player who will get the message.
-     * @param message The message as JSON.
+     * @param message The message as a JSON text component.
      */
     public static void sendRawMessage(Player sender, String message) {
         Component component;
