@@ -16,6 +16,9 @@
  */
 package com.mcmiddleearth.pluginutil.message;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mcmiddleearth.pluginutil.FileUtil;
 import com.mcmiddleearth.pluginutil.NumericUtil;
 import com.mcmiddleearth.pluginutil.PluginUtilsPlugin;
@@ -37,6 +40,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -155,15 +159,18 @@ public class MessageUtil {
 
     /**
      * Send a message given as a JSON text component. Its click and hover events may use the field names Minecraft
-     * used before 1.21.5 (clickEvent, hoverEvent) or the current ones (click_event, hover_event). JSON that cannot be
-     * read is logged as a warning and not sent.
+     * used before 1.21.5 (clickEvent, hoverEvent) or the current ones (click_event, hover_event). A click that would
+     * open an address Minecraft cannot open, such as ftp://..., copies the address instead, with a warning. JSON
+     * that cannot be read is logged as a warning and not sent.
      * @param sender Player who will get the message.
      * @param message The message as a JSON text component.
      */
     public static void sendRawMessage(Player sender, String message) {
         Component component;
         try {
-            component = GsonComponentSerializer.gson().deserialize(message);
+            JsonElement json = JsonParser.parseString(message);
+            copyAddressesMinecraftCannotOpen(json);
+            component = GsonComponentSerializer.gson().deserializeFromTree(json);
         } catch(RuntimeException ex) {
             Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Could not send a message to "
                     + sender.getName() + " because its JSON is not valid: " + ex.getMessage());
@@ -172,6 +179,56 @@ public class MessageUtil {
         if(component != null) {
             sender.sendMessage(component);
         }
+    }
+
+    /**
+     * Turns every click in the JSON, wherever it is nested, that would open an address Minecraft cannot open into
+     * one that copies the address. Adventure refuses an address that is not a URI, and a player's client
+     * disconnects on a message holding an address that is neither http nor https.
+     */
+    private static void copyAddressesMinecraftCannotOpen(JsonElement json) {
+        if(json.isJsonArray()) {
+            for(JsonElement element: json.getAsJsonArray()) {
+                copyAddressesMinecraftCannotOpen(element);
+            }
+        } else if(json.isJsonObject()) {
+            JsonObject object = json.getAsJsonObject();
+            for(String key: new String[]{"clickEvent", "click_event"}) {
+                JsonElement click = object.get(key);
+                String address = null;
+                if(click != null && click.isJsonObject()) {
+                    address = addressMinecraftCannotOpen(click.getAsJsonObject());
+                }
+                if(address != null) {
+                    JsonObject copy = new JsonObject();
+                    copy.addProperty("action", "copy_to_clipboard");
+                    copy.addProperty("value", address);
+                    object.add(key, copy);
+                    Logger.getLogger(MessageUtil.class.getName()).log(Level.WARNING, "Minecraft cannot open \""
+                            + address + "\", so clicking it in a message copies it instead.");
+                }
+            }
+            for(Map.Entry<String, JsonElement> member: object.entrySet()) {
+                copyAddressesMinecraftCannotOpen(member.getValue());
+            }
+        }
+    }
+
+    /**
+     * The address of an open_url click that Minecraft cannot open, or null.
+     */
+    private static String addressMinecraftCannotOpen(JsonObject click) {
+        JsonElement action = click.get("action");
+        if(action == null || !action.isJsonPrimitive() || !action.getAsString().equals("open_url")) {
+            return null;
+        }
+        for(String key: new String[]{"url", "value"}) {
+            JsonElement address = click.get(key);
+            if(address != null && address.isJsonPrimitive() && !FancyMessage.isWebAddress(address.getAsString())) {
+                return address.getAsString();
+            }
+        }
+        return null;
     }
         
     public void sendFancyFileListMessage(Player recipient, FancyMessage header,

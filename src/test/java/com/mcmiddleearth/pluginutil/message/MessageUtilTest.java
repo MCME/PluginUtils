@@ -7,13 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
@@ -93,6 +98,42 @@ class MessageUtilTest {
         assertDoesNotThrow(() -> MessageUtil.sendRawMessage(player, "{\"text\":\"broken\""));
 
         assertNull(player.nextComponentMessage());
+    }
+
+    /**
+     * A player's client disconnects on an address to open that is neither http nor https, and Adventure refuses one
+     * that is no URI.
+     */
+    static Stream<Arguments> addressesMinecraftCannotOpen() {
+        return Stream.of(
+                arguments("{\"text\":\"server\","
+                        + "\"clickEvent\":{\"action\":\"open_url\",\"value\":\"ts3server://ts.mcmiddleearth.com\"}}",
+                        "ts3server://ts.mcmiddleearth.com"),
+                arguments("{\"text\":\"server\","
+                        + "\"click_event\":{\"action\":\"open_url\",\"url\":\"ftp://files.mcmiddleearth.com\"}}",
+                        "ftp://files.mcmiddleearth.com"),
+                arguments("{\"text\":\"\",\"extra\":[{\"text\":\"server\","
+                        + "\"click_event\":{\"action\":\"open_url\",\"url\":\"" + WEBSITE + "/a page\"}}]}",
+                        WEBSITE + "/a page"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("addressesMinecraftCannotOpen")
+    void addressMinecraftCannotOpenArrivesAsACopyClick(String json, String address) {
+        MessageUtil.sendRawMessage(player, json);
+
+        Component message = received();
+        assertEquals("server", plainText(message));
+        assertEquals(ClickEvent.copyToClipboard(address), styleOf(message, "server").clickEvent());
+    }
+
+    @Test
+    void addressMinecraftCannotOpenInsideATooltipIsCopiedToo() {
+        MessageUtil.sendRawMessage(player, "{\"text\":\"info\",\"hoverEvent\":{\"action\":\"show_text\","
+                + "\"contents\":{\"text\":\"files\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"ftp://x\"}}}}");
+
+        Component tooltip = tooltipOf(received(), "info");
+        assertEquals(ClickEvent.copyToClipboard("ftp://x"), styleOf(tooltip, "files").clickEvent());
     }
 
     private Component received() {
