@@ -268,7 +268,8 @@ public final class FancyMessage {
     private TextComponent toComponent(String[] messageData) {
         String command = messageData[1];
         String hoverText = messageData[2];
-        TextComponent.Builder part = Component.text().content(messageData[0]);
+        // A typed \n is a line break, as it was when the text went to /tellraw inside a JSON string.
+        TextComponent.Builder part = Component.text().content(messageData[0].replace("\\n", "\n"));
         TextColor color = textColor(messageData.length>3?messageData[3]:colorString(baseColor));
         if(color != null) {
             part.color(color);

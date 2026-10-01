@@ -264,6 +264,22 @@ class FancyMessageTest {
         assertEquals("[Test] Rank #1 in the list, plot #12", plainText(received(player)));
     }
 
+    /**
+     * As MCME-Architect's sign editor builds its message: each line ends with a typed \n.
+     */
+    @Test
+    void typedBackslashNInTheTextIsALineBreak() {
+        FancyMessage message = new FancyMessage(MessageType.INFO, messageUtil);
+        message.addSimple("You are editing sign side: FRONT\\n");
+        message.addSimple("Click at a line to edit it.\\n");
+        message.addFancy("[1] Welcome\\n", "/sign 1 Welcome",
+                "Click to edit. Don't change the leading '/sign <line index> '.");
+        message.send(player);
+
+        assertEquals("[Test] You are editing sign side: FRONT\nClick at a line to edit it.\n[1] Welcome\n",
+                plainText(received(player)));
+    }
+
     private static String withoutCodes(String text) {
         return text.replaceAll("§[0-9a-fk-or]", "");
     }
