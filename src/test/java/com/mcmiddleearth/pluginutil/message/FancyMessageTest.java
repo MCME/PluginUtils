@@ -307,7 +307,7 @@ class FancyMessageTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"https://www.mcmiddleearth.com/a page", "httpx://www.mcmiddleearth.com", "http:"})
-    void webAddressMinecraftCannotOpenIsLeftOutWithAWarning(String address) {
+    void webAddressMinecraftCannotOpenIsCopiedInsteadWithAWarning(String address) {
         Logger logger = Logger.getLogger(FancyMessage.class.getName());
         List<String> warnings = new ArrayList<>();
         Handler handler = new Handler() {
@@ -334,10 +334,25 @@ class FancyMessageTest {
         }
 
         Component message = received(player);
-        assertNull(styleOf(message, "website").clickEvent());
+        assertEquals(ClickEvent.copyToClipboard(address), styleOf(message, "website").clickEvent());
         assertEquals("Our website", plainText(tooltipOf(message, "website")));
         assertEquals(1, warnings.size(), "warnings: " + warnings);
         assertTrue(warnings.get(0).contains(address), warnings.get(0));
+    }
+
+    /**
+     * Without a click of its own, a later part would use the first part's click.
+     */
+    @Test
+    void partWithAnAddressMinecraftCannotOpenDoesNotUseTheFirstPartsClick() {
+        new FancyMessage(MessageType.WHITE, messageUtil)
+                .addClickable("§3/cmd", "/cmd ")
+                .addClickable(" our site", "https://www.mcmiddleearth.com/a page")
+                .setRunDirect()
+                .send(player);
+
+        assertEquals(ClickEvent.copyToClipboard("https://www.mcmiddleearth.com/a page"),
+                styleOf(received(player), " our site").clickEvent());
     }
 
     @Test

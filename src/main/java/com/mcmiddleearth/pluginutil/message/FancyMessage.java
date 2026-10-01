@@ -299,7 +299,8 @@ public final class FancyMessage {
     }
 
     /**
-     * The click event for a part, or null when its web address cannot be opened.
+     * The click event for a part. A web address Minecraft cannot open is copied instead, so that the part still has
+     * a click of its own rather than the first part's.
      */
     private ClickEvent<?> clickEvent(String command) {
         if(copyToClipboard) {
@@ -308,9 +309,9 @@ public final class FancyMessage {
             if(isWebAddress(command)) {
                 return ClickEvent.openUrl(command);
             }
-            Logger.getLogger(FancyMessage.class.getName()).log(Level.WARNING, "Left out the click of a message part: \""
-                    + command + "\" is not a web address Minecraft can open.");
-            return null;
+            Logger.getLogger(FancyMessage.class.getName()).log(Level.WARNING, "Minecraft cannot open \"" + command
+                    + "\", so clicking it in a message copies it instead.");
+            return ClickEvent.copyToClipboard(command);
         } else if(runDirect) {
             return ClickEvent.runCommand(allowedInChat(command));
         } else {
@@ -322,7 +323,7 @@ public final class FancyMessage {
      * Whether this web address can be sent and opened. Adventure takes it only if it is a URI; Paper sends it as a
      * URI with https:// in front when it has no "://"; and a player's client can only read http and https addresses.
      */
-    private static boolean isWebAddress(String url) {
+    static boolean isWebAddress(String url) {
         try {
             new URI(url);
             String scheme = new URI(url.contains("://")?url:"https://"+url).getScheme();
