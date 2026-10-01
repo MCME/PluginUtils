@@ -51,7 +51,9 @@ dependencies {
     }
 
     // The tests run on MockBukkit's mock server. It needs a paper-api of the same Minecraft version (26.2) on the
-    // test classpath, and brings JUnit 6 (JUnit Jupiter) with it.
+    // test classpath, and brings JUnit 6 (JUnit Jupiter) with it. paper-api build 126 rather than the dev bundle's
+    // 111: the same Minecraft version and Adventure (5.2.0), and the build MCME-PvP's tests already run MockBukkit
+    // 4.116.1 with, so it is in the local Maven repository for offline builds.
     testImplementation 'io.papermc.paper:paper-api:26.2.build.126-stable'
     testImplementation 'org.mockbukkit.mockbukkit:mockbukkit-v26.2:4.116.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:6.1.3'
