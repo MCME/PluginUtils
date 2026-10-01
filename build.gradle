@@ -73,6 +73,12 @@ java {
     withSourcesJar()
 }
 
+// The sources hold characters beyond ASCII (the section sign, and the angle quotes of the list pager), so read them
+// as UTF-8 rather than in whatever encoding the JDK takes as its default.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
 // The plugin.yml still uses Maven-style ${project.artifactId}/${project.version} tokens; substitute
 // them at build time (Gradle does not do Maven resource filtering) so Paper gets a valid name.
 processResources {

@@ -27,6 +27,13 @@ final class RenderedText {
      * The style the client draws a piece of text with. Fails if no piece of the component is exactly that text.
      */
     static Style styleOf(Component component, String text) {
+        return stylesOf(component, text).get(0);
+    }
+
+    /**
+     * The styles the client draws each piece of exactly this text with, in order. Fails if there is none.
+     */
+    static List<Style> stylesOf(Component component, String text) {
         List<String> pieces = new ArrayList<>();
         List<Style> matches = new ArrayList<>();
         Deque<Style> styles = new ArrayDeque<>();
@@ -53,7 +60,7 @@ final class RenderedText {
         if (matches.isEmpty()) {
             fail("No piece \"" + text + "\" in " + pieces);
         }
-        return matches.get(0);
+        return matches;
     }
 
     /**

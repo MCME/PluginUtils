@@ -2,6 +2,7 @@ package com.mcmiddleearth.pluginutil.message;
 
 import static com.mcmiddleearth.pluginutil.message.RenderedText.plainText;
 import static com.mcmiddleearth.pluginutil.message.RenderedText.styleOf;
+import static com.mcmiddleearth.pluginutil.message.RenderedText.stylesOf;
 import static com.mcmiddleearth.pluginutil.message.RenderedText.tooltipOf;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -155,6 +156,23 @@ class MessageUtilTest {
         assertPageButton(pager, "[‹ Prev]", "/test list 1", "Page 1");
         assertEquals(NamedTextColor.GRAY, styleOf(pager, "Page 2/3").color());
         assertPageButton(pager, "[Next ›]", "/test list 3", "Page 3");
+        // The page and the spaces between the parts are plain: no button's click or tooltip reaches them.
+        List<Style> plainParts = new ArrayList<>(stylesOf(pager, " "));
+        assertEquals(2, plainParts.size());
+        plainParts.add(styleOf(pager, "Page 2/3"));
+        for (Style plainPart : plainParts) {
+            assertNull(plainPart.clickEvent());
+            assertNull(plainPart.hoverEvent());
+        }
+    }
+
+    @Test
+    void pageButtonsLeaveOutWhatMinecraftDoesNotAllowInAChatCommand() {
+        List<Component> messages = listPage(25, 2, "/test §alist\t");
+
+        Component pager = messages.get(messages.size() - 1);
+        assertEquals(ClickEvent.runCommand("/test alist 1"), styleOf(pager, "[‹ Prev]").clickEvent());
+        assertEquals(ClickEvent.runCommand("/test alist 3"), styleOf(pager, "[Next ›]").clickEvent());
     }
 
     @Test
@@ -201,16 +219,20 @@ class MessageUtilTest {
         assertEquals("[‹ Prev] Page 3/3", plainText(messages.get(messages.size() - 1)));
     }
 
+    private List<Component> listPage(int lineCount, int page) {
+        return listPage(lineCount, page, "/test list");
+    }
+
     /**
      * Sends one page of a list of numbered lines and returns every message the player got.
      */
-    private List<Component> listPage(int lineCount, int page) {
+    private List<Component> listPage(int lineCount, int page, String listCommand) {
         List<FancyMessage> lines = new ArrayList<>();
         for (int i = 1; i <= lineCount; i++) {
             lines.add(new FancyMessage(MessageType.WHITE, messageUtil).addSimple("line " + i));
         }
         messageUtil.sendFancyListMessage(player, new FancyMessage(MessageType.INFO, messageUtil).addSimple("Lines"),
-                lines, "/test list", page);
+                lines, listCommand, page);
         List<Component> messages = new ArrayList<>();
         for (Component message = player.nextComponentMessage(); message != null;
                 message = player.nextComponentMessage()) {
