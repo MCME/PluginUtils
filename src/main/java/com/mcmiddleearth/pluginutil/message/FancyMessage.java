@@ -188,7 +188,7 @@ public final class FancyMessage {
     }
 
     /**
-     * Where the first § with a code character after it is, or -1.
+     * Where the first § is that has a character after it, or -1: a § at the very end is plain text.
      */
     private static int colorCodeIndex(String text) {
         int index = text.indexOf("§");

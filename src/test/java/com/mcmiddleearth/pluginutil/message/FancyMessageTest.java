@@ -264,6 +264,13 @@ class FancyMessageTest {
     }
 
     @Test
+    void sectionSignAtTheVeryEndOfTheTextIsText() {
+        new FancyMessage(MessageType.INFO, messageUtil).addSimple("abc§").send(player);
+
+        assertEquals("[Test] abc§", plainText(received(player)));
+    }
+
+    @Test
     void hashInMessageTextIsAColourOnlyBeforeSixHexDigits() {
         new FancyMessage(MessageType.INFO, messageUtil).addSimple("Rank #1 in the list, plot #12").send(player);
 
