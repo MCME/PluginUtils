@@ -9,6 +9,8 @@ import com.google.gson.JsonObject;
 import com.mcmiddleearth.pluginutil.message.config.FancyMessageConfigUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -17,6 +19,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -138,8 +141,8 @@ public final class FancyMessage {
         String color = colorString(baseColor);
         while(text.length()>0) {
             String format = "";
-            int colorPos = text.indexOf("§");
-            int hexColorPos = text.indexOf("#");
+            int colorPos = colorCodeIndex(text);
+            int hexColorPos = hexColorIndex(text);
             ChatColor chatColor = null;
             if(colorPos != 0 && hexColorPos != 0) {
                 chatColor = baseColor;
@@ -164,8 +167,8 @@ public final class FancyMessage {
                 format = ", \"bold\" : false, \"underlined\" : false, \"strikethrough\" : false, \"obfuscated\" : false, \"italic\" : false";
                 color = colorString(baseColor);
             }
-            colorPos = text.indexOf("§");
-            hexColorPos = text.indexOf("#");
+            colorPos = colorCodeIndex(text);
+            hexColorPos = hexColorIndex(text);
             String textPart;
             if(colorPos < 0 && hexColorPos < 0) {
                 textPart = text;
@@ -180,6 +183,25 @@ public final class FancyMessage {
             data.add(new String[]{textPart, onClickCommand, onHoverText, color, format});
         }
         return this;
+    }
+
+    /**
+     * Where the first § with a code character after it is, or -1.
+     */
+    private static int colorCodeIndex(String text) {
+        int index = text.indexOf("§");
+        return (index < text.length()-1?index:-1);
+    }
+
+    /**
+     * Where the first # followed by six hex digits is, or -1: any other # is plain text.
+     */
+    private static int hexColorIndex(String text) {
+        int index = text.indexOf("#");
+        while(index >= 0 && !JsonMessageParser.isHexColor(text, index+1)) {
+            index = text.indexOf("#", index+1);
+        }
+        return index;
     }
     
     /**
@@ -257,12 +279,20 @@ public final class FancyMessage {
         if(command!=null) {
             part.clickEvent(clickEvent(command));
         }
-        if(hoverText!=null) {
-            Component tooltip = GsonComponentSerializer.gson()
-                    .deserializeFromTree(JsonMessageParser.parseColoredText(hoverText));
-            part.hoverEvent(HoverEvent.showText(tooltip));
+        if(hoverText!=null && !hoverText.isEmpty()) {
+            part.hoverEvent(HoverEvent.showText(tooltip(hoverText)));
         }
         return part.build();
+    }
+
+    private static Component tooltip(String hoverText) {
+        try {
+            return GsonComponentSerializer.gson().deserializeFromTree(JsonMessageParser.parseColoredText(hoverText));
+        } catch(RuntimeException ex) {
+            Logger.getLogger(FancyMessage.class.getName()).log(Level.WARNING, "Could not read the codes in tooltip \""
+                    + hoverText + "\" (" + ex + "), so only its § codes are shown.");
+            return LegacyComponentSerializer.legacySection().deserialize(hoverText);
+        }
     }
 
     private ClickEvent<?> clickEvent(String command) {
