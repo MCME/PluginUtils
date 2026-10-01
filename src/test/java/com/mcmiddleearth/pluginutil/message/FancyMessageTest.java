@@ -340,6 +340,58 @@ class FancyMessageTest {
         assertTrue(warnings.get(0).contains(address), warnings.get(0));
     }
 
+    @Test
+    void quotesAndBackslashesStayAsTyped() {
+        String text = "say \"hi\" in C:\\temp";
+        new FancyMessage(MessageType.INFO, messageUtil)
+                .addFancy(text, "/say \"hi\" in C:\\temp", "Says \"hi\" in C:\\temp")
+                .send(player);
+
+        Component message = received(player);
+        assertEquals(ClickEvent.suggestCommand("/say \"hi\" in C:\\temp"), styleOf(message, text).clickEvent());
+        assertEquals("Says \"hi\" in C:\\temp", plainText(tooltipOf(message, text)));
+    }
+
+    /**
+     * getData() hands out the parts themselves, so a plugin can add one without a colour or format.
+     */
+    @Test
+    void partAddedWithoutAColourGetsTheBaseColour() {
+        FancyMessage message = new FancyMessage(MessageType.INFO, messageUtil).setBaseColor(ChatColor.RED);
+        message.getData().add(new String[]{"added", "/added", null});
+        message.send(player);
+
+        Style added = styleOf(received(player), "added");
+        assertEquals(NamedTextColor.RED, added.color());
+        assertEquals(ClickEvent.suggestCommand("/added"), added.clickEvent());
+    }
+
+    @Test
+    void laterPartsUseTheFirstPartsClickWhenThereIsNoPrefix() {
+        new FancyMessage(MessageType.WHITE, messageUtil)
+                .addClickable("§3plan", "/plan load plan")
+                .addSimple("§f the plan of the town")
+                .setRunDirect()
+                .send(player);
+
+        assertEquals(ClickEvent.runCommand("/plan load plan"),
+                styleOf(received(player), " the plan of the town").clickEvent());
+    }
+
+    @Test
+    void baseColourComesFromTheConstructorAndSetBaseColor() {
+        new FancyMessage(MessageType.INFO, messageUtil, ChatColor.GREEN)
+                .addSimple("green ")
+                .setBaseColor(ChatColor.RED)
+                .addSimple("red")
+                .send(player);
+
+        Component message = received(player);
+        assertEquals(NamedTextColor.AQUA, styleOf(message, "[Test] ").color());
+        assertEquals(NamedTextColor.GREEN, styleOf(message, "green ").color());
+        assertEquals(NamedTextColor.RED, styleOf(message, "red").color());
+    }
+
     private static String withoutCodes(String text) {
         return text.replaceAll("§[0-9a-fk-or]", "");
     }

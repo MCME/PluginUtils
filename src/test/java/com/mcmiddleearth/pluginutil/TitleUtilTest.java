@@ -59,6 +59,13 @@ class TitleUtilTest {
         assertEquals(List.of("times 10 40 10", "title \"Mellon\""), shown);
     }
 
+    @Test
+    void fallbackKeepsFadeInStayAndFadeOutApart() {
+        TitleUtil.showTitle(player, "Welcome", "to Middle-earth", 5, 60, 15);
+
+        assertEquals(List.of("times 5 60 15", "title Welcome", "subtitle to Middle-earth"), shown);
+    }
+
     private static String describe(TitlePart<?> part, Object value) {
         if (part == TitlePart.TIMES) {
             Title.Times times = (Title.Times) value;
