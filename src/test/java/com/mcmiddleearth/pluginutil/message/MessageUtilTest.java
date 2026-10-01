@@ -9,10 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,11 +31,14 @@ class MessageUtilTest {
     private static final String WEBSITE = "https://www.mcmiddleearth.com";
 
     private PlayerMock player;
+    private MessageUtil messageUtil;
 
     @BeforeEach
     void setUp() {
         ServerMock server = MockBukkit.mock();
         player = server.addPlayer();
+        messageUtil = new MessageUtil();
+        messageUtil.setPluginName("Test");
     }
 
     @AfterEach
@@ -134,6 +140,90 @@ class MessageUtilTest {
 
         Component tooltip = tooltipOf(received(), "info");
         assertEquals(ClickEvent.copyToClipboard("ftp://x"), styleOf(tooltip, "files").clickEvent());
+    }
+
+    @Test
+    void middlePageOfAListEndsWithBothButtonsAndThePage() {
+        List<Component> messages = listPage(25, 2);
+
+        assertEquals("[Test] Lines", plainText(messages.get(0)));
+        assertEquals("line 11", plainText(messages.get(1)));
+        assertEquals("line 20", plainText(messages.get(10)));
+        assertEquals(12, messages.size());
+        Component pager = messages.get(11);
+        assertEquals("[‹ Prev] Page 2/3 [Next ›]", plainText(pager));
+        assertPageButton(pager, "[‹ Prev]", "/test list 1", "Page 1");
+        assertEquals(NamedTextColor.GRAY, styleOf(pager, "Page 2/3").color());
+        assertPageButton(pager, "[Next ›]", "/test list 3", "Page 3");
+    }
+
+    @Test
+    void firstPageOfAListHasNoPrevButton() {
+        List<Component> messages = listPage(25, 1);
+
+        assertEquals("[Test] Lines", plainText(messages.get(0)));
+        assertEquals("line 1", plainText(messages.get(1)));
+        assertEquals(12, messages.size());
+        Component pager = messages.get(11);
+        assertEquals("Page 1/3 [Next ›]", plainText(pager));
+        assertEquals(NamedTextColor.GRAY, styleOf(pager, "Page 1/3").color());
+        assertPageButton(pager, "[Next ›]", "/test list 2", "Page 2");
+    }
+
+    @Test
+    void lastPageOfAListHasNoNextButton() {
+        List<Component> messages = listPage(25, 3);
+
+        assertEquals("[Test] Lines", plainText(messages.get(0)));
+        assertEquals("line 21", plainText(messages.get(1)));
+        assertEquals("line 25", plainText(messages.get(5)));
+        assertEquals(7, messages.size());
+        Component pager = messages.get(6);
+        assertEquals("[‹ Prev] Page 3/3", plainText(pager));
+        assertEquals(NamedTextColor.GRAY, styleOf(pager, "Page 3/3").color());
+        assertPageButton(pager, "[‹ Prev]", "/test list 2", "Page 2");
+    }
+
+    @Test
+    void listOfOnePageHasNoPager() {
+        List<Component> messages = listPage(10, 1);
+
+        assertEquals(11, messages.size());
+        assertEquals("[Test] Lines", plainText(messages.get(0)));
+        assertEquals("line 10", plainText(messages.get(10)));
+    }
+
+    @Test
+    void pageBeyondTheListShowsItsLastPage() {
+        List<Component> messages = listPage(25, 9);
+
+        assertEquals("line 21", plainText(messages.get(1)));
+        assertEquals("[‹ Prev] Page 3/3", plainText(messages.get(messages.size() - 1)));
+    }
+
+    /**
+     * Sends one page of a list of numbered lines and returns every message the player got.
+     */
+    private List<Component> listPage(int lineCount, int page) {
+        List<FancyMessage> lines = new ArrayList<>();
+        for (int i = 1; i <= lineCount; i++) {
+            lines.add(new FancyMessage(MessageType.WHITE, messageUtil).addSimple("line " + i));
+        }
+        messageUtil.sendFancyListMessage(player, new FancyMessage(MessageType.INFO, messageUtil).addSimple("Lines"),
+                lines, "/test list", page);
+        List<Component> messages = new ArrayList<>();
+        for (Component message = player.nextComponentMessage(); message != null;
+                message = player.nextComponentMessage()) {
+            messages.add(message);
+        }
+        return messages;
+    }
+
+    private static void assertPageButton(Component pager, String label, String command, String tooltip) {
+        Style button = styleOf(pager, label);
+        assertEquals(NamedTextColor.AQUA, button.color());
+        assertEquals(ClickEvent.runCommand(command), button.clickEvent());
+        assertEquals(tooltip, plainText(tooltipOf(pager, label)));
     }
 
     private Component received() {

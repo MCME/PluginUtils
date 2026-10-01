@@ -337,7 +337,7 @@ public final class FancyMessage {
      * The command without the characters Minecraft does not allow in chat: §, control characters and DEL. Paper
      * cannot send a click event holding one of them and would drop the whole message.
      */
-    private static String allowedInChat(String command) {
+    static String allowedInChat(String command) {
         StringBuilder allowed = new StringBuilder(command.length());
         for(char c: command.toCharArray()) {
             if(c != '§' && c >= ' ' && c != 127) {

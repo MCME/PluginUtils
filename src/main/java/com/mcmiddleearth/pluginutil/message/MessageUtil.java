@@ -23,6 +23,10 @@ import com.mcmiddleearth.pluginutil.FileUtil;
 import com.mcmiddleearth.pluginutil.NumericUtil;
 import com.mcmiddleearth.pluginutil.PluginUtilsPlugin;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -311,23 +315,35 @@ public class MessageUtil {
         if(page<1) {
             page = 1;
         }
-        header.addSimple(" [page " +page+"/"+maxPage+"]").
-               send(recipient);
-        if(page>1) {
-            new FancyMessage(MessageType.INFO_INDENTED, this)
-                .addClickable(ChatColor.BLUE+"---^ page up ^---", listCommand+" "+(page-1))
-                .setRunDirect()
-                .send(recipient);
-        }
+        header.send(recipient);
         for(int i = (page-1)*PAGE_LENGTH; i < list.size() && i < page*PAGE_LENGTH; i++) {
             list.get(i).send(recipient);
         }
-        if(page<maxPage) {
-            new FancyMessage(MessageType.INFO_INDENTED, this)
-                .addClickable(ChatColor.BLUE+"---v page down v--", listCommand+" "+(page+1))
-                .setRunDirect()
-                .send(recipient);
+        if(maxPage>1) {
+            recipient.sendMessage(pager(listCommand, page, maxPage));
         }
+    }
+
+    /**
+     * The last line of a list with more than one page, as in the chat menus of MCME's newer plugins:
+     * [‹ Prev] Page 2/3 [Next ›]. Each button runs the list command for its page.
+     */
+    private static Component pager(String listCommand, int page, int pages) {
+        List<Component> parts = new ArrayList<>();
+        if(page>1) {
+            parts.add(pageButton("[‹ Prev]", listCommand, page-1));
+        }
+        parts.add(Component.text("Page "+page+"/"+pages, NamedTextColor.GRAY));
+        if(page<pages) {
+            parts.add(pageButton("[Next ›]", listCommand, page+1));
+        }
+        return Component.join(JoinConfiguration.spaces(), parts);
+    }
+
+    private static Component pageButton(String label, String listCommand, int page) {
+        return Component.text(label, NamedTextColor.AQUA)
+                .clickEvent(ClickEvent.runCommand(FancyMessage.allowedInChat(listCommand+" "+page)))
+                .hoverEvent(HoverEvent.showText(Component.text("Page "+page)));
     }
 
     private static String getDescription(File file) {

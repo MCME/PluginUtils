@@ -240,12 +240,13 @@ class FancyMessageTest {
         messageUtil.sendFancyListMessage(player, new FancyMessage(MessageType.INFO, messageUtil).addSimple("Help"),
                 lines, "/test help", 1);
 
-        assertEquals("[Test] Help [page 1/2]", plainText(received(player)));
+        assertEquals("[Test] Help", plainText(received(player)));
         for (int i = 1; i <= 10; i++) {
             assertEquals("/cmd" + i, plainText(received(player)));
         }
-        assertEquals(ClickEvent.runCommand("/test help 2"),
-                styleOf(received(player), "---v page down v--").clickEvent());
+        Component pager = received(player);
+        assertEquals("Page 1/2 [Next ›]", plainText(pager));
+        assertEquals(ClickEvent.runCommand("/test help 2"), styleOf(pager, "[Next ›]").clickEvent());
         assertNull(player.nextComponentMessage());
     }
 
