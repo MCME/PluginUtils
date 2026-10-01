@@ -7,6 +7,8 @@ package com.mcmiddleearth.pluginutil.message;
 
 import com.google.gson.JsonObject;
 import com.mcmiddleearth.pluginutil.message.config.FancyMessageConfigUtil;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -296,16 +298,52 @@ public final class FancyMessage {
         }
     }
 
+    /**
+     * The click event for a part, or null when its web address cannot be opened.
+     */
     private ClickEvent<?> clickEvent(String command) {
         if(copyToClipboard) {
             return ClickEvent.copyToClipboard(command);
         } else if(command.startsWith("http")) {
-            return ClickEvent.openUrl(command);
+            if(isWebAddress(command)) {
+                return ClickEvent.openUrl(command);
+            }
+            Logger.getLogger(FancyMessage.class.getName()).log(Level.WARNING, "Left out the click of a message part: \""
+                    + command + "\" is not a web address Minecraft can open.");
+            return null;
         } else if(runDirect) {
-            return ClickEvent.runCommand(command);
+            return ClickEvent.runCommand(allowedInChat(command));
         } else {
-            return ClickEvent.suggestCommand(command);
+            return ClickEvent.suggestCommand(allowedInChat(command));
         }
+    }
+
+    /**
+     * Whether this web address can be sent and opened. Adventure takes it only if it is a URI; Paper sends it as a
+     * URI with https:// in front when it has no "://"; and a player's client can only read http and https addresses.
+     */
+    private static boolean isWebAddress(String url) {
+        try {
+            new URI(url);
+            String scheme = new URI(url.contains("://")?url:"https://"+url).getScheme();
+            return scheme != null && (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"));
+        } catch(URISyntaxException ex) {
+            return false;
+        }
+    }
+
+    /**
+     * The command without the characters Minecraft does not allow in chat: §, control characters and DEL. Paper
+     * cannot send a click event holding one of them and would drop the whole message.
+     */
+    private static String allowedInChat(String command) {
+        StringBuilder allowed = new StringBuilder(command.length());
+        for(char c: command.toCharArray()) {
+            if(c != '§' && c >= ' ' && c != 127) {
+                allowed.append(c);
+            }
+        }
+        return allowed.toString();
     }
 
     /**

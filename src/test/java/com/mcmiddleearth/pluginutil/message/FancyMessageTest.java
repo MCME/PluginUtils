@@ -7,10 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -25,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
@@ -278,6 +284,60 @@ class FancyMessageTest {
 
         assertEquals("[Test] You are editing sign side: FRONT\nClick at a line to edit it.\n[1] Welcome\n",
                 plainText(received(player)));
+    }
+
+    @Test
+    void commandLosesTheCharactersMinecraftDoesNotAllowInChat() {
+        String command = "/warp §aSpawn\n\tnow" + (char) 127;
+        new FancyMessage(MessageType.INFO, messageUtil).addClickable("suggested", command).send(player);
+        new FancyMessage(MessageType.INFO, messageUtil).addClickable("run", command).setRunDirect().send(player);
+
+        assertEquals(ClickEvent.suggestCommand("/warp aSpawnnow"),
+                styleOf(received(player), "suggested").clickEvent());
+        assertEquals(ClickEvent.runCommand("/warp aSpawnnow"), styleOf(received(player), "run").clickEvent());
+    }
+
+    @Test
+    void copiedTextKeepsEveryCharacter() {
+        String text = "§aSpawn\n\tnow";
+        new FancyMessage(MessageType.INFO, messageUtil).addClickable("copy", text).setCopyToClipboard().send(player);
+
+        assertEquals(ClickEvent.copyToClipboard(text), styleOf(received(player), "copy").clickEvent());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"https://www.mcmiddleearth.com/a page", "httpx://www.mcmiddleearth.com", "http:"})
+    void webAddressMinecraftCannotOpenIsLeftOutWithAWarning(String address) {
+        Logger logger = Logger.getLogger(FancyMessage.class.getName());
+        List<String> warnings = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                if (record.getLevel() == Level.WARNING) {
+                    warnings.add(record.getMessage());
+                }
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        logger.addHandler(handler);
+        try {
+            new FancyMessage(MessageType.INFO, messageUtil).addFancy("website", address, "Our website").send(player);
+        } finally {
+            logger.removeHandler(handler);
+        }
+
+        Component message = received(player);
+        assertNull(styleOf(message, "website").clickEvent());
+        assertEquals("Our website", plainText(tooltipOf(message, "website")));
+        assertEquals(1, warnings.size(), "warnings: " + warnings);
+        assertTrue(warnings.get(0).contains(address), warnings.get(0));
     }
 
     private static String withoutCodes(String text) {
