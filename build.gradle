@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.mcmiddleearth'
-version = '2.0.5-SNAPSHOT'
+version = '2.0.5'
 
 repositories {
     // For the tests only: MockBukkit, the paper-api it runs against and their dependencies come from the local

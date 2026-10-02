@@ -44,7 +44,7 @@ PluginUtils is a **runtime plugin dependency** — compile against it (`compileO
 declare it in your `plugin.yml`, and let the server provide it. Do not shade it in.
 
 Releases are published to MCME's Maven repository as `com.mcmiddleearth:PluginUtils`; reading it
-needs no credentials. The latest is **2.0.4**, and [CHANGELOG.md](CHANGELOG.md) lists what changed
+needs no credentials. The latest is **2.0.5**, and [CHANGELOG.md](CHANGELOG.md) lists what changed
 in each release.
 
 **Gradle**
@@ -53,9 +53,9 @@ repositories {
     maven { url = 'https://repo.mcmiddleearth.com/releases' }
 }
 dependencies {
-    compileOnly 'com.mcmiddleearth:PluginUtils:2.0.4'
+    compileOnly 'com.mcmiddleearth:PluginUtils:2.0.5'
     // Only if your tests load PluginUtils classes (e.g. with MockBukkit):
-    testImplementation 'com.mcmiddleearth:PluginUtils:2.0.4'
+    testImplementation 'com.mcmiddleearth:PluginUtils:2.0.5'
 }
 ```
 
@@ -71,7 +71,7 @@ dependencies {
 <dependency>
     <groupId>com.mcmiddleearth</groupId>
     <artifactId>PluginUtils</artifactId>
-    <version>2.0.4</version>
+    <version>2.0.5</version>
     <scope>provided</scope>
 </dependency>
 ```
