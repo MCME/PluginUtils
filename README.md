@@ -95,7 +95,7 @@ Two things to know:
 
 [JitPack] builds any tag, branch or commit on demand, as `com.github.MCME:PluginUtils:<version>`
 from the `https://jitpack.io` repository. That is handy for trying an unreleased commit, or a branch
-build such as `pluginutils-26.2-SNAPSHOT`; the first request for a version waits while JitPack
+build such as `development-SNAPSHOT`; the first request for a version waits while JitPack
 builds it. Prefer the release coordinates above for anything you deploy: JitPack takes the groupId
 from the GitHub org, and build tools treat different groupIds as different libraries, so a build
 that also pulls in `com.mcmiddleearth:PluginUtils` (directly or through another MCME library) ends
@@ -105,10 +105,14 @@ up with two copies on its classpath and no version resolution between them.
 
 ## Branches
 
-- **`master`** — 1.9.x, Paper 1.21.x. Legacy Maven build that compiles against a local server jar,
-  so it is not portable; releases 1.9.0 to 1.9.2 are on repo.mcmiddleearth.com.
-- **`pluginutils-26.2`** — 2.0.x, Paper 26.x. Gradle + paperweight, built by CI on every push;
-  pushing a release tag publishes that version to repo.mcmiddleearth.com.
+- **`master`** — releases: 2.0.x, Paper 26.x. It only moves when a version is released, through a
+  pull request from `development`; the release commit is tagged (`2.0.5`), and pushing the tag
+  publishes that version to repo.mcmiddleearth.com.
+- **`development`** — where the work happens, through pull requests. CI builds every pull request
+  and every push.
 
-The other branches are history: `development` fed 1.9.x into `master`, `1.13` dates from 2018, and
-`publish-2.0.2` is where 2.0.2 was published from, because its tag predates the publishing setup.
+The other branches are history: `pluginutils-26.2` is where 2.0.x was ported, up to 2.0.5;
+`publish-2.0.2` is where 2.0.2 was published from, because its tag predates the publishing setup;
+and `1.13` dates from 2018. The 1.9.x line (Paper 1.21.x, a legacy Maven build that compiles
+against a local server jar, so it is not portable) ends at commit `f17ced6`; its releases 1.9.0
+to 1.9.2 are on repo.mcmiddleearth.com.
