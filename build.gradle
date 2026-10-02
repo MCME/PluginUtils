@@ -2,7 +2,9 @@ plugins {
     // java-library (not plain java) for the `api` configuration json-simple needs below.
     id 'java-library'
     id 'maven-publish'
-    id 'io.papermc.paperweight.userdev' version '2.0.0-SNAPSHOT'
+    // A released version, not the moving 2.0.0-SNAPSHOT: on 2026-09-28 the snapshot began to require
+    // Gradle 9.7.1, so this Gradle 9.0.0 build could no longer resolve it. beta.24 and later need 9.7.1 too.
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.23'
 }
 
 group = 'com.mcmiddleearth'
