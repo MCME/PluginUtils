@@ -12,7 +12,8 @@ plugin, and other MCME plugins compile against it and declare it as a dependency
 - **`nms`** — thin NMS/CraftBukkit access helpers (`AccessNBT`, `AccessWorld`, `AccessServer`,
   `AccessInventory`, `NBTTagBuilder`, …).
 - **`region`** — region math (`CuboidRegion`, `PrismoidRegion`), including WorldEdit interop.
-- **`message`** — chat/`FancyMessage` helpers.
+- **`message`** — chat/`FancyMessage` helpers, sent as Adventure components so clicks and tooltips
+  work on 26.2; paged lists end with a `[‹ Prev] Page 2/3 [Next ›]` line.
 - **`confirmation`**, **`developer`** — confirmation prompts and small developer utilities.
 - Top-level helpers: `LegacyMaterialUtil` (pre-1.13 id/data → `BlockData`), `WEUtil` (WorldEdit),
   `DynmapUtil` (Dynmap).
@@ -35,6 +36,12 @@ builds on any machine and in CI.
 
 The first build downloads and decompiles the Paper server (a few minutes); it's cached afterwards.
 The plugin jar is written to `build/libs/`.
+
+paperweight-userdev is pinned to a released version (`2.0.0-beta.23` in `build.gradle`), not its
+moving `2.0.0-SNAPSHOT`. On 2026-09-28 a new snapshot began to require Gradle 9.7.1, and this
+project's wrapper is Gradle 9.0.0, so every clean build (CI, JitPack) failed while machines with a
+cached snapshot kept working. Releases from `2.0.0-beta.24` on need Gradle 9.7.1 as well, so upgrade
+the plugin and the Gradle wrapper together.
 
 [paperweight-userdev]: https://github.com/PaperMC/paperweight
 
@@ -116,3 +123,18 @@ The other branches are history: `pluginutils-26.2` is where 2.0.x was ported, up
 and `1.13` dates from 2018. The 1.9.x line (Paper 1.21.x, a legacy Maven build that compiles
 against a local server jar, so it is not portable) ends at commit `f17ced6`; its releases 1.9.0
 to 1.9.2 are on repo.mcmiddleearth.com.
+
+## Releasing
+
+1. On a branch from `development`, set `version` in `build.gradle` to the release (say `2.0.6`),
+   move the notes under the CHANGELOG's `[Unreleased]` into a `## [2.0.6] - <date>` section with its
+   compare link, and update the version in this README (the "latest" line and the Gradle and Maven
+   snippets). Commit it as `release: PluginUtils 2.0.6 — <what changed>` and open a pull request
+   into `development`.
+2. When CI is green and the pull request is merged, tag the release commit (annotated and bare:
+   `2.0.6`) and push the tag. CI then publishes that version to repo.mcmiddleearth.com. The
+   `releases` repository refuses to overwrite a version, so each version publishes only once: check
+   the published POM, module and jar afterwards.
+3. Open a pull request from `development` into `master`.
+4. On `development`, start the next version: `version = '2.0.7-SNAPSHOT'`, committed as
+   `chore: begin 2.0.7-SNAPSHOT`.
