@@ -7,6 +7,12 @@ repo.mcmiddleearth.com.
 
 ## [Unreleased]
 
+### Fixed
+
+- A jar built on Windows differed from the one CI builds: `processResources` fills in `plugin.yml`
+  line by line, and Gradle writes each line with the operating system's line separator, so a
+  Windows build carried CRLF. The build now writes LF everywhere, and both give the same bytes.
+
 ## [2.0.5] - 2026-10-02
 
 The public API is unchanged: plugins built against 2.0.2 or later need no rebuild.

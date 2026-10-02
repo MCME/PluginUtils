@@ -92,6 +92,10 @@ processResources {
         filter { line ->
             line.replace('${project.artifactId}', 'PluginUtils').replace('${project.version}', pluginVersion)
         }
+        // The line filter above writes each line with this OS's line separator (CRLF on Windows).
+        // Fix them to LF, so a jar built on Windows is byte-identical to the one CI builds on Linux.
+        filter(org.apache.tools.ant.filters.FixCrLfFilter,
+               eol: org.apache.tools.ant.filters.FixCrLfFilter.CrLf.newInstance('lf'))
     }
 }
 
