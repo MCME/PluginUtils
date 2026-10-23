@@ -12,6 +12,8 @@ repo.mcmiddleearth.com.
 - A jar built on Windows differed from the one CI builds: `processResources` fills in `plugin.yml`
   line by line, and Gradle writes each line with the operating system's line separator, so a
   Windows build carried CRLF. The build now writes LF everywhere, and both give the same bytes.
+- `MessageUtil.hoverFormat` cuts a word longer than a hover line holds (38 characters or more) over
+  lines of its own, so every line stays within the hover width.
 
 ## [2.0.5] - 2026-10-02
 
