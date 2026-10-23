@@ -8,8 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -45,6 +47,22 @@ class MessageUtilTest {
     @AfterEach
     void tearDown() {
         MockBukkit.unmock();
+    }
+
+    // A hover line holds a word of at most 37 characters. A longer word gets lines of its own, cut where each is full.
+    @Test
+    void aWordLongerThanAHoverLineGetsLinesOfItsOwn() {
+        String formatted = assertTimeoutPreemptively(Duration.ofSeconds(5),
+                () -> messageUtil.hoverFormat("/cmd: before " + "x".repeat(60) + " after", ":", true));
+
+        assertEquals("§6/cmd:\n§ebefore\n§e" + "x".repeat(37) + "\n§e" + "x".repeat(23) + "\n§eafter", formatted);
+    }
+
+    @Test
+    void aWordThatFillsALineStaysWhole() {
+        assertEquals("§e§e" + "x".repeat(37), messageUtil.hoverFormat("x".repeat(37), ":", false));
+        assertEquals("§e§e" + "x".repeat(37) + "\n§ex", assertTimeoutPreemptively(Duration.ofSeconds(5),
+                () -> messageUtil.hoverFormat("x".repeat(38), ":", false)));
     }
 
     /**
