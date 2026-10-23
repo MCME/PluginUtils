@@ -7,6 +7,10 @@ repo.mcmiddleearth.com.
 
 ## [Unreleased]
 
+## [2.0.6] - 2026-10-23
+
+The public API is unchanged: plugins built against 2.0.2 or later need no rebuild.
+
 ### Fixed
 
 - A jar built on Windows differed from the one CI builds: `processResources` fills in `plugin.yml`
@@ -128,7 +132,8 @@ No Java changes: the compiled classes are byte-identical to 2.0.2.
 First portable release: Gradle + paperweight-userdev instead of a local server jar, Paper 26.1.2,
 JDK 25. It does not load, and its tag was withdrawn; use 2.0.1 or later.
 
-[Unreleased]: https://github.com/MCME/PluginUtils/compare/2.0.5...HEAD
+[Unreleased]: https://github.com/MCME/PluginUtils/compare/2.0.6...HEAD
+[2.0.6]: https://github.com/MCME/PluginUtils/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/MCME/PluginUtils/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/MCME/PluginUtils/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/MCME/PluginUtils/compare/2.0.2...2.0.3
