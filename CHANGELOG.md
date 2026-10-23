@@ -5,6 +5,20 @@ paperweight-userdev). The format follows [Keep a Changelog](https://keepachangel
 Releases are tagged bare (`2.0.4`, not `v2.0.4`), and pushing a tag publishes that version to
 repo.mcmiddleearth.com.
 
+## [Unreleased]
+
+## [2.0.6] - 2026-10-23
+
+The public API is unchanged: plugins built against 2.0.2 or later need no rebuild.
+
+### Fixed
+
+- A jar built on Windows differed from the one CI builds: `processResources` fills in `plugin.yml`
+  line by line, and Gradle writes each line with the operating system's line separator, so a
+  Windows build carried CRLF. The build now writes LF everywhere, and both give the same bytes.
+- `MessageUtil.hoverFormat` cuts a word longer than a hover line holds (38 characters or more) over
+  lines of its own, so every line stays within the hover width.
+
 ## [2.0.5] - 2026-10-02
 
 The public API is unchanged: plugins built against 2.0.2 or later need no rebuild.
@@ -118,6 +132,8 @@ No Java changes: the compiled classes are byte-identical to 2.0.2.
 First portable release: Gradle + paperweight-userdev instead of a local server jar, Paper 26.1.2,
 JDK 25. It does not load, and its tag was withdrawn; use 2.0.1 or later.
 
+[Unreleased]: https://github.com/MCME/PluginUtils/compare/2.0.6...HEAD
+[2.0.6]: https://github.com/MCME/PluginUtils/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/MCME/PluginUtils/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/MCME/PluginUtils/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/MCME/PluginUtils/compare/2.0.2...2.0.3

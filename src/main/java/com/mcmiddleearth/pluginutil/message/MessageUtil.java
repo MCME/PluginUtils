@@ -432,6 +432,19 @@ public class MessageUtil {
                 line = line.concat(scanner.currentToken);
                 scanner.next();
             }
+            // A word longer than a whole line never fits: give it lines of its own, cut where each is full.
+            if(first && scanner.hasCurrent()
+                    && !scanner.currentToken.equals("\n")
+                    && !scanner.currentToken.equals("\\n")) {
+                String word = scanner.currentToken;
+                int room = LENGTH_OF_HOVER_LINE - 1 - line.length();   // the line holds only its colour code here
+                line = line.concat(word.substring(0, room));
+                for(int start = room; start < word.length(); start += room) {
+                    line = line.concat("\n" + HIGHLIGHT_STRESSED
+                            + word.substring(start, Math.min(start + room, word.length())));
+                }
+                scanner.next();
+            }
             if(scanner.hasCurrent()) {
                 line = line.concat("\n");
                 if(scanner.currentToken.equals("\n") 
